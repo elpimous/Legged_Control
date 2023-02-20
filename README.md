@@ -1,9 +1,12 @@
 # Legged_Controller for Ylo2.
 
 ### This is a specific lib for ylo2, to interface to legged_control, from Qiayuanliao
-https://github.com/qiayuanliao
+
+https://github.com/qiayuanliao/legged_control.git
 
 #### New quadruped robot, working on UP Xtreme board, and BLDC motors from Mjbots
+
+![Alt text](images/robot/rotation_real.gif?raw=true "Ylo-2 360 rotation on grass")
 
 ![Alt text](images/robot/dock2.jpg?raw=true "Ylo-2 on it dockstation")
 ![Alt text](images/robot/dock1.jpg?raw=true)
