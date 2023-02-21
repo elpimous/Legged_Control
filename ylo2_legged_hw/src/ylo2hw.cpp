@@ -5,29 +5,35 @@
 //
 
 #include "ylo2_legged_hw/ylo2hw.h"
-#include "lib/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
+//#include "lib/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
+#include "sensor_msgs/Imu.h"
 
-YloTwoPcanToMoteus command; // instance of class YloTwoPcanToMoteus
+//YloTwoPcanToMoteus command; // instance of class YloTwoPcanToMoteus
 
+/*
 bool Ylo2Interface::startup_routine()
 {
-  command.peak_fdcan_board_initialization();
+  //command.peak_fdcan_board_initialization();
   usleep(200);// TODO : test and reduce pause !
-  command.check_initial_ground_pose();
+  //command.check_initial_ground_pose();
   std::cout << "--- startup_routine Done. ---" << std::endl;
   usleep(200);// TODO : test and reduce pause !
   return true;
 }
-
+*/
 
 namespace legged {
 
 bool Ylo2HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
+
   if (!LeggedHW::init(root_nh, robot_hw_nh)) {
     return false;
   }
 
   // robot_hw_nh.getParam("power_limit", powerLimit_);  // TODO use it later for RTH
+
+  // Imu subscriber
+  ros::Subscriber sub = root_nh.subscribe("imu/data", 100, Ylo2HW::ImuCallback);
 
   setupJoints();
   setupImu();
@@ -45,6 +51,13 @@ bool Ylo2HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 }
 
 
+// the imu callback
+void Ylo2HW::ImuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
+  ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
+          imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
+}
+
+
 void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
 
   // read the 12 joints, and store values into legged controller
@@ -58,29 +71,32 @@ void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
     RX_temp = 0.0;
     RX_fault = 0.0;
 
-    auto ids  = command.motor_adapters_[i].getIdx();
-    int port  = command.motor_adapters_[i].getPort();
-    auto sign = command.motor_adapters_[i].getSign();
+    //auto ids  = command.motor_adapters_[i].getIdx();
+    //int port  = command.motor_adapters_[i].getPort();
+    //auto sign = command.motor_adapters_[i].getSign();
 
     // call ylo2 moteus lib
+    /*
     command.read_moteus_RX_queue(ids, port, 
                                   RX_pos, RX_vel, RX_tor, 
                                   RX_volt, RX_temp, RX_fault);  // query values;
-
+    */
     usleep(10); // TODO : test and reduce pause !
 
     // ex : jointData_ = [(pos_, vel_, tau_, posDes_, velDes_, kp_, kd_, ff_), (pos_, vel_, tau_, posDes_, velDes_, kp_, kd_, ff_),...]
-    jointData_[i].pos_ = static_cast<double>(sign*(RX_pos*2*M_PI)); // joint turns to radians
-    jointData_[i].vel_ = static_cast<double>(RX_vel);   // measured in revolutions / s
-    jointData_[i].tau_ = static_cast<double>(RX_tor);   // measured in N*m
+    //jointData_[i].pos_ = static_cast<double>(sign*(RX_pos*2*M_PI)); // joint turns to radians
+    //jointData_[i].vel_ = static_cast<double>(RX_vel);   // measured in revolutions / s
+    //jointData_[i].tau_ = static_cast<double>(RX_tor);   // measured in N*m
 
     // TODO read volt, temp, faults for Diagnostics
 
     usleep(200); // TODO : test and reduce pause !
+  }
 
   // TODO
   // imu_message contains the real imu topic msg
   // read imu message, and store values into legged controller
+  /*
   imu_message = imu_callback(); _// read imu full message_
 
   imuData_.ori_[0]        = imu_message->orientation.x;
@@ -94,6 +110,7 @@ void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
   imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
   imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
+  */
 
   for (size_t i = 0; i < CONTACT_SENSOR_NAMES.size(); ++i) { // "RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"
     contactState_[i] = 0.0; // lowState_.footForce[i] > contactThreshold_;
@@ -113,20 +130,22 @@ void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
 void Ylo2HW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
 
   for (int i = 0; i < 12; ++i) {
-    auto ids  = command.motor_adapters_[i].getIdx(); // moteus controller id
-    int port  = command.motor_adapters_[i].getPort(); // select correct port on Peak canfd board
+    //auto ids  = command.motor_adapters_[i].getIdx(); // moteus controller id
+    //int port  = command.motor_adapters_[i].getPort(); // select correct port on Peak canfd board
     //auto sign = command.motor_adapters_[i].getSign(); // in case of joint reverse rotation
-
+    /*
     joint_position = static_cast<float>(jointData_[i].posDes_);;
     joint_velocity = static_cast<float>(jointData_[i].velDes_);
     joint_fftorque = static_cast<float>(jointData_[i].ff_);
     joint_kp       = static_cast<float>(jointData_[i].kp_);
     joint_kd       = static_cast<float>(jointData_[i].kd_);
-
+    */
     // call ylo2 moteus lib
+    /*
     command.send_moteus_TX_frame(ids, port, 
                                 joint_position, joint_velocity, joint_fftorque, joint_kp, joint_kd); 
     usleep(120); // TODO : test and reduce pause !
+    */
   }
 }
 

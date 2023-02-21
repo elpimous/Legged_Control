@@ -6,7 +6,9 @@
 #pragma once // directive de  préprocesseur : le fichier source actuel n'est inclus qu'une seule fois lors de la compilation
 
 #include <legged_hw/LeggedHW.h>
-#include "lib/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
+#include <sensor_msgs/Imu.h>
+
+//#include "lib/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
 
 namespace legged {
   
@@ -48,6 +50,10 @@ class Ylo2HW : public LeggedHW {
    * @param robot_hw_nh Node-handle for robot hardware.
    * @return True when init successful, False when failed. */
   bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
+
+
+  // imu callback
+  void ImuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
 
 
   /** \brief Communicate with hardware. Get data, status of robot.

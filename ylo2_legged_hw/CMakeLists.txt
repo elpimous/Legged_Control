@@ -21,6 +21,17 @@ catkin_package(
 ## Build ##
 ###########
 
+# Motors driver
+#include_directories(
+#        moteus_driver/include
+#        include
+#        ${catkin_INCLUDE_DIRS}
+#)
+# Motors driver
+#add_subdirectory(moteus_driver)
+
+#target_link_libraries(moteus_driver ${catkin_LIBRARIES})
+
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}
@@ -31,7 +42,7 @@ link_directories(lib)
 ## Declare cpp executables
 add_executable(${PROJECT_NAME}
         src/ylo2_legged_hw.cpp
-        src/Ylo2hw.cpp
+        src/ylo2hw.cpp
         )
 
 ## Specify libraries to link executable targets against
@@ -48,8 +59,8 @@ if (cmake_clang_tools_FOUND)
     message(STATUS "Run clang tooling for target " ${PROJECT_NAME})
     add_clang_tooling(
             TARGETS ${PROJECT_NAME}
-            SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include/ylo2_legged_hw
-            CT_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include/ylo2_legged_hw
+            SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include
+            CT_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
             CF_WERROR
     )
 
