@@ -33,9 +33,9 @@ https://github.com/qiayuanliao/legged_control.git
 
 - [ ] Distance sensors SRF10
 
-- [x] URDF
+- [ ] URDF
 
-- [ ] Legged_control Moteus controller (position mode)
+- [x] Legged_control Moteus controller (position mode)
 
 - [ ] Improving gait
 
