@@ -347,8 +347,6 @@ bool YloTwoPcanToMoteus::check_initial_ground_pose(){
             usleep(200);
 
             // --- CHECKING JOINT STARTUP ANGLE ---
-            float value = (std::abs(RX_pos) - std::abs(target_joint_position));
-            float angle_error = value*360; // turn * 360 to obtain degreed
             //ROS_INFO("--Controleur ID : %d ; actual position : %f ; zero target position : %f ; difference : %f ; angle error in degrees : %f degrees", ids, RX_pos, target_joint_position, value, angle_error);
             if(std::abs(std::abs(RX_pos) - std::abs(target_joint_position)) > std::abs(calibration_error)){
                 is_calibrated = false;

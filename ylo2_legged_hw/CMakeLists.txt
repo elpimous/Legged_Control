@@ -40,11 +40,12 @@ add_executable(${PROJECT_NAME}
 
 ## Specify libraries to link executable targets against
 
-target_link_libraries(moteus_driver ${catkin_LIBRARIES})
+#target_link_libraries(moteus_driver ${catkin_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME}
         ${catkin_LIBRARIES}
         ${EXTRA_LIBS}
+        moteus_driver
         )
 
 #########################

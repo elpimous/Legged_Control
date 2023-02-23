@@ -5,24 +5,24 @@
 //
 
 #include "ylo2_legged_hw/ylo2hw.h"
-#include "moteus_driver/include/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
+#include "moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
 #include "sensor_msgs/Imu.h"
 
-//YloTwoPcanToMoteus command; // instance of class YloTwoPcanToMoteus
+YloTwoPcanToMoteus command; // instance of class YloTwoPcanToMoteus
 
-/*
-bool Ylo2Interface::startup_routine()
+namespace legged {
+
+
+bool Ylo2HW::startup_routine()
 {
-  //command.peak_fdcan_board_initialization();
+  command.peak_fdcan_board_initialization();
   usleep(200);// TODO : test and reduce pause !
   //command.check_initial_ground_pose();
   std::cout << "--- startup_routine Done. ---" << std::endl;
   usleep(200);// TODO : test and reduce pause !
   return true;
 }
-*/
 
-namespace legged {
 
 bool Ylo2HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
@@ -40,7 +40,7 @@ bool Ylo2HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   setupContactSensor(robot_hw_nh);
 
   std::string robot_type;
-  root_nh.getParam("robot_type", robot_type);
+  root_nh.getParam("robot_type", robot_type); // TODO: to remove
   if (robot_type == "a1") {
     std::cout <<"LE ROBOT CIBLE EST = " << robot_type << std::endl;
   } else {
@@ -87,6 +87,9 @@ void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
     //jointData_[i].pos_ = static_cast<double>(sign*(RX_pos*2*M_PI)); // joint turns to radians
     //jointData_[i].vel_ = static_cast<double>(RX_vel);   // measured in revolutions / s
     //jointData_[i].tau_ = static_cast<double>(RX_tor);   // measured in N*m
+    jointData_[i].pos_ = static_cast<double>(0.0); // joint turns to radians
+    jointData_[i].vel_ = static_cast<double>(0.0);   // measured in revolutions / s
+    jointData_[i].tau_ = static_cast<double>(0.0);   // measured in N*m
 
     // TODO read volt, temp, faults for Diagnostics
 
@@ -111,6 +114,17 @@ void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
   imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
   */
+  imuData_.ori_[0]        = 0.000000001;
+  imuData_.ori_[1]        = 0.000000001;
+  imuData_.ori_[2]        = 0.000000001;
+  imuData_.ori_[3]        = 1.0; // TODO : is this 4rd index w, or x ?
+
+  imuData_.angularVel_[0] = 0.000000001;
+  imuData_.angularVel_[1] = 0.000000001;
+  imuData_.angularVel_[2] = 0.000000001;
+  imuData_.linearAcc_[0]  = 0.000000001;
+  imuData_.linearAcc_[1]  = 0.000000001;
+  imuData_.linearAcc_[2]  = 0.000000001;
 
   for (size_t i = 0; i < CONTACT_SENSOR_NAMES.size(); ++i) { // "RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"
     contactState_[i] = 0.0; // lowState_.footForce[i] > contactThreshold_;
@@ -195,8 +209,8 @@ bool Ylo2HW::setupJoints() {
 // I must call here covariances ?!
 bool Ylo2HW::setupImu() {
 
-  imuData_.oriCov_[0] = 0.0012; // TODO must replace with my real cov ?
-  imuData_.oriCov_[4] = 0.0012; // TODO is it usefull to feed all 9 cov ?
+  imuData_.oriCov_[0] = 0.0012;
+  imuData_.oriCov_[4] = 0.0012;
   imuData_.oriCov_[8] = 0.0012;
 
   imuData_.angularVelCov_[0] = 0.0004; // same here...
