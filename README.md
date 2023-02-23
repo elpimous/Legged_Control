@@ -11,6 +11,9 @@ https://github.com/qiayuanliao/legged_control.git
 ![Alt text](images/robot/dock2.jpg?raw=true "Ylo-2 on it dockstation")
 ![Alt text](images/robot/dock4.jpg?raw=true)
 
+![Alt text](images/robot/ylo2_360.mp4?raw=true)
+
+
 ----
 
 # WORKING PROCESS :
