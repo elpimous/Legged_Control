@@ -8,8 +8,6 @@
 #include <legged_hw/LeggedHW.h>
 #include <sensor_msgs/Imu.h>
 
-//#include "lib/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
-
 namespace legged {
   
 const std::vector<std::string> CONTACT_SENSOR_NAMES = {"RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"}; 
@@ -98,7 +96,8 @@ class Ylo2HW : public LeggedHW {
   Ylo2ImuData imuData_{};
   bool contactState_[4]{};
 
-  //int contactThreshold_{};
+  int contactThreshold_{};
+  int powerLimit_{};
 };
 
 }  // namespace legged

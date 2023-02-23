@@ -5,7 +5,7 @@
 //
 
 #include "ylo2_legged_hw/ylo2hw.h"
-//#include "lib/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
+#include "moteus_driver/include/moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
 #include "sensor_msgs/Imu.h"
 
 //YloTwoPcanToMoteus command; // instance of class YloTwoPcanToMoteus
@@ -30,10 +30,10 @@ bool Ylo2HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
     return false;
   }
 
-  // robot_hw_nh.getParam("power_limit", powerLimit_);  // TODO use it later for RTH
+  robot_hw_nh.getParam("power_limit", powerLimit_);  // TODO use it later for RTH
 
-  // Imu subscriber
-  ros::Subscriber sub = root_nh.subscribe("imu/data", 100, Ylo2HW::ImuCallback);
+  // Imu subscriber 
+  ros::Subscriber sub = root_nh.subscribe("imu/data", 100, &legged::Ylo2HW::ImuCallback, this);
 
   setupJoints();
   setupImu();
@@ -41,20 +41,20 @@ bool Ylo2HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
   std::string robot_type;
   root_nh.getParam("robot_type", robot_type);
-  if (robot_type == "ylo2") {
+  if (robot_type == "a1") {
     std::cout <<"LE ROBOT CIBLE EST = " << robot_type << std::endl;
   } else {
-    ROS_FATAL("Unknown robot type: %s, error L41 ylo2hw.cpp", robot_type.c_str());
+    ROS_FATAL("Unknown robot type: %s, error L47 ylo2hw.cpp", robot_type.c_str());
     return false;
   }
   return true;
 }
 
 
-// the imu callback
+// the imu callback  // void legged::Ylo2HW::ImuCallback(const ConstPtr&)
 void Ylo2HW::ImuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
-  ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
-          imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
+  //ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
+  //        imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
 }
 
 

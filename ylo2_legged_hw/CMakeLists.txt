@@ -21,21 +21,14 @@ catkin_package(
 ## Build ##
 ###########
 
-# Motors driver
-#include_directories(
-#        moteus_driver/include
-#        include
-#        ${catkin_INCLUDE_DIRS}
-#)
-# Motors driver
-#add_subdirectory(moteus_driver)
-
-#target_link_libraries(moteus_driver ${catkin_LIBRARIES})
-
 include_directories(
+        moteus_driver/include
         include
         ${catkin_INCLUDE_DIRS}
 )
+
+# Motors driver
+add_subdirectory(moteus_driver)
 
 link_directories(lib)
 
@@ -46,6 +39,9 @@ add_executable(${PROJECT_NAME}
         )
 
 ## Specify libraries to link executable targets against
+
+target_link_libraries(moteus_driver ${catkin_LIBRARIES})
+
 target_link_libraries(${PROJECT_NAME}
         ${catkin_LIBRARIES}
         ${EXTRA_LIBS}
@@ -71,6 +67,10 @@ endif (cmake_clang_tools_FOUND)
 #############
 
 # Mark executables and/or libraries for installation
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+        
 install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
