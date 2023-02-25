@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-project(ylo2_legged_hw)
+project(legged_unitree_hw)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(catkin REQUIRED
         COMPONENTS
         roscpp
+        sensor_msgs
         legged_hw
         )
 
@@ -32,15 +33,15 @@ add_subdirectory(moteus_driver)
 
 link_directories(lib)
 
+#set(EXTRA_LIBS)
+
 ## Declare cpp executables
 add_executable(${PROJECT_NAME}
-        src/ylo2_legged_hw.cpp
-        src/ylo2hw.cpp
+        src/legged_unitree_hw.cpp
+        src/UnitreeHW.cpp
         )
 
-## Specify libraries to link executable targets against
-
-#target_link_libraries(moteus_driver ${catkin_LIBRARIES})
+add_dependencies(legged_unitree_hw sensor_msgs_generate_messages_cpp)
 
 target_link_libraries(${PROJECT_NAME}
         ${catkin_LIBRARIES}
@@ -56,8 +57,8 @@ if (cmake_clang_tools_FOUND)
     message(STATUS "Run clang tooling for target " ${PROJECT_NAME})
     add_clang_tooling(
             TARGETS ${PROJECT_NAME}
-            SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include
-            CT_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+            SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include/legged_unitree_hw
+            CT_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include/legged_unitree_hw
             CF_WERROR
     )
 
@@ -68,10 +69,6 @@ endif (cmake_clang_tools_FOUND)
 #############
 
 # Mark executables and/or libraries for installation
-
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-        
 install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

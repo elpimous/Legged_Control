@@ -33,15 +33,13 @@
 
 //
 // Created by qiayuan on 12/27/20.
-// Adapted for Ylo2 robot - vincent foucault - 2023-02
-// this code should be ok !
-//-------------------------
+//
 
 #include <legged_hw/LeggedHWLoop.h>
-#include "ylo2_legged_hw/ylo2hw.h"
+#include "legged_unitree_hw/UnitreeHW.h"
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "ylo2_legged_hw");
+  ros::init(argc, argv, "legged_unitree_hw");
   ros::NodeHandle nh;
   ros::NodeHandle robotHwNh("~");
 
@@ -56,14 +54,14 @@ int main(int argc, char** argv) {
 
   try {
     // Create the hardware interface specific to your robot
-    std::shared_ptr<legged::Ylo2HW> Ylo2HW = std::make_shared<legged::Ylo2HW>();
+    std::shared_ptr<legged::UnitreeHW> unitreeHw = std::make_shared<legged::UnitreeHW>();
     // Initialize the hardware interface:
     // 1. retrieve configuration from rosparam
     // 2. initialize the hardware and interface it with ros_control
-    Ylo2HW->init(nh, robotHwNh);
+    unitreeHw->init(nh, robotHwNh);
 
     // Start the control loop
-    legged::LeggedHWLoop controlLoop(nh, Ylo2HW);
+    legged::LeggedHWLoop controlLoop(nh, unitreeHw);
 
     // Wait until shutdown signal received
     ros::waitForShutdown();
