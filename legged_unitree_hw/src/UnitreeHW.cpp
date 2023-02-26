@@ -14,13 +14,24 @@ namespace legged {
 
 bool UnitreeHW::startup_routine()
 {
-  command.peak_fdcan_board_initialization();
+  //command.peak_fdcan_board_initialization();
   //usleep(200);// TODO : test and reduce pause !
-  command.check_initial_ground_pose();
+  //command.check_initial_ground_pose();
   std::cout << "--- startup_routine Done. ---" << std::endl;
   //usleep(200);// TODO : test and reduce pause !
   return true;
 }
+
+float imuorientx = 0.0;
+
+// the imu callback
+void UnitreeHW::ImuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
+  
+  ROS_INFO("****************** Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
+          imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
+  float imuorientx = imu_message->orientation.x;
+}
+
 
 bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   if (!LeggedHW::init(root_nh, robot_hw_nh)) {
@@ -30,7 +41,7 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   robot_hw_nh.getParam("power_limit", powerLimit_);
 
   // Imu subscriber 
-  ros::Subscriber sub = root_nh.subscribe("imu/data", 100, &legged::UnitreeHW::ImuCallback, this);
+  ros::Subscriber sub = root_nh.subscribe("imu/data", 1000, &UnitreeHW::ImuCallback, this);
 
   setupJoints();
   setupImu();
@@ -49,17 +60,8 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   return true;
 }
 
-float imuorientx = 0.0; //imu variable test
-
-// the imu callback  // void legged::Ylo2HW::ImuCallback(const ConstPtr&)
-void UnitreeHW::ImuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
-  ROS_INFO("****************** Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
-          imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
-  float imuorientx = imu_message->orientation.x;
-}
-
 void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
-  ROS_INFO("read function");
+  //ROS_INFO("read function");
 
   // read the 12 joints, and store values into legged controller
   for (int i = 0; i < 12; ++i) {
@@ -77,21 +79,17 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
     auto sign = command.motor_adapters_[i].getSign();
 
     // call ylo2 moteus lib
-  
+  /*
     command.read_moteus_RX_queue(ids, port, 
                                   RX_pos, RX_vel, RX_tor, 
                                   RX_volt, RX_temp, RX_fault);  // query values;
-
+*/
     //usleep(10); // TODO : test and reduce pause !
 
     // ex : jointData_ = [(pos_, vel_, tau_, posDes_, velDes_, kp_, kd_, ff_), (pos_, vel_, tau_, posDes_, velDes_, kp_, kd_, ff_),...]
     jointData_[i].pos_ = static_cast<double>(sign*(RX_pos*2*M_PI)); // joint turns to radians
     jointData_[i].vel_ = static_cast<double>(RX_vel);   // measured in revolutions / s
     jointData_[i].tau_ = static_cast<double>(RX_tor);   // measured in N*m
-
-    //jointData_[i].pos_ = static_cast<double>(0.0); // joint turns to radians
-    //jointData_[i].vel_ = static_cast<double>(0.0);   // measured in revolutions / s
-    //jointData_[i].tau_ = static_cast<double>(0.0);   // measured in N*m
 
     // TODO read volt, temp, faults for Diagnostics
 
@@ -101,8 +99,7 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
   // TODO
   // imu_message contains the real imu topic msg
   // read imu message, and store values into legged controller
-
-  ROS_INFO("read imu => [%f]", imuorientx);
+  //ROS_INFO("read imu => [%f]", imuorientx);
   /*
   imu_message = imu_callback(); _// read imu full message_
 
@@ -140,7 +137,7 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
 }
 
 void UnitreeHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
-  ROS_INFO("write function");
+  //ROS_INFO("write function");
   for (int i = 0; i < 12; ++i) {
     auto ids  = command.motor_adapters_[i].getIdx(); // moteus controller id
     int port  = command.motor_adapters_[i].getPort(); // select correct port on Peak canfd board
@@ -153,11 +150,11 @@ void UnitreeHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/
     joint_kd       = static_cast<float>(jointData_[i].kd_);
 
     // call ylo2 moteus lib
-
+/*
     command.send_moteus_TX_frame(ids, port, 
                                 joint_position, joint_velocity, joint_fftorque, joint_kp, joint_kd); 
     //usleep(120); // TODO : test and reduce pause !
-
+*/
   }
 }
 
