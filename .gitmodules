@@ -1,3 +1,0 @@
-[submodule "legged_control"]
-	path = legged_control
-	url = ../../qiayuanliao/legged_control.git
