@@ -28,7 +28,9 @@ https://github.com/qiayuanliao/legged_control.git
 
 - [ ] Realsense T265
 
-- [x] Myahrs+ IMU
+- [ ] Myahrs+ IMU
+
+- [x] GPIO security switch
 
 - [x] Ros noetic
 
@@ -36,9 +38,9 @@ https://github.com/qiayuanliao/legged_control.git
 
 - [ ] Distance sensors SRF10
 
-- [ ] URDF
+- [x] URDF
 
-- [x] Legged_control Moteus controller (position mode)
+- [x] Moteus controller (position mode)
 
 - [ ] Improving gait
 
