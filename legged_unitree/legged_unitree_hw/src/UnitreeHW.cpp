@@ -50,7 +50,6 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   ros::Subscriber sub = root_nh.subscribe("imu/data", 1000, &UnitreeHW::ImuCallback, this);
 
   setupJoints();
-  setupImu();
   setupContactSensor(robot_hw_nh);
 
   std::string robot_type;
@@ -183,21 +182,20 @@ bool UnitreeHW::setupJoints() {
   return true;
 }
 
-// imuSensorInterface_ miising from the header, not sure this will compile
-bool UnitreeHW::setupImu() {
-  imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("unitree_imu", "unitree_imu", imuData_.ori_, imuData_.oriCov_,
-                                                                         imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,
-                                                                         imuData_.linearAccCov_));
-  imuData_.oriCov_[0] = 0.0012;
-  imuData_.oriCov_[4] = 0.0012;
-  imuData_.oriCov_[8] = 0.0012;
-
-  imuData_.angularVelCov_[0] = 0.0004;
-  imuData_.angularVelCov_[4] = 0.0004;
-  imuData_.angularVelCov_[8] = 0.0004;
-
-  return true;
-}
+// bool UnitreeHW::setupImu() {
+//   imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("unitree_imu", "unitree_imu", imuData_.ori_, imuData_.oriCov_,
+//                                                                          imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,
+//                                                                          imuData_.linearAccCov_));
+//   imuData_.oriCov_[0] = 0.0012;
+//   imuData_.oriCov_[4] = 0.0012;
+//   imuData_.oriCov_[8] = 0.0012;
+//
+//   imuData_.angularVelCov_[0] = 0.0004;
+//   imuData_.angularVelCov_[4] = 0.0004;
+//   imuData_.angularVelCov_[8] = 0.0004;
+//
+//   return true;
+// }
 
 bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh) {
   nh.getParam("contact_threshold", contactThreshold_);

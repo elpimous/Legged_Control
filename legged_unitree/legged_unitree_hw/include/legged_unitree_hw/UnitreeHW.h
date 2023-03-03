@@ -81,7 +81,7 @@ class UnitreeHW : public LeggedHW {
 
   bool setupJoints();
 
-  bool setupImu();
+  // bool setupImu();
 
   bool setupContactSensor(ros::NodeHandle& nh);
 
