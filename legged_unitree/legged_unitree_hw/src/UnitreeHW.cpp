@@ -7,28 +7,35 @@
 #include "moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
 #include "sensor_msgs/Imu.h"
 
-YloTwoPcanToMoteus command; // instance of class YloTwoPcanToMoteus
-
 namespace legged {
 
 bool UnitreeHW::startup_routine()
 {
-  //command.peak_fdcan_board_initialization();
+  //command_.peak_fdcan_board_initialization();
   //usleep(200);// TODO : test and reduce pause !
-  //command.check_initial_ground_pose();
+  //command_.check_initial_ground_pose();
   std::cout << "--- startup_routine Done. ---" << std::endl;
   //usleep(200);// TODO : test and reduce pause !
   return true;
 }
 
-float imuorientx = 0.0;
-
 // the imu callback
-void UnitreeHW::ImuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
-  
+// As a callback, it doesn't need to be manually called : it will wait for a signal on the topic it is subscribed to
+void UnitreeHW::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
+
   ROS_INFO("****************** Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
           imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
-  float imuorientx = imu_message->orientation.x;
+  imuData_.ori_[0]        = imu_message->orientation.x;
+  imuData_.ori_[1]        = imu_message->orientation.y;
+  imuData_.ori_[2]        = imu_message->orientation.z;
+  imuData_.ori_[3]        = imu_message->orientation.w; // TODO : is this 4rd index w, or x ?
+
+  imuData_.angularVel_[0] = imu_message->angular_velocity.x;
+  imuData_.angularVel_[1] = imu_message->angular_velocity.y;
+  imuData_.angularVel_[2] = imu_message->angular_velocity.z;
+  imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
+  imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
+  imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
 }
 
 
@@ -39,7 +46,7 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
   robot_hw_nh.getParam("power_limit", powerLimit_);
 
-  // Imu subscriber 
+  // Imu subscriber
   ros::Subscriber sub = root_nh.subscribe("imu/data", 1000, &UnitreeHW::ImuCallback, this);
 
   setupJoints();
@@ -73,14 +80,14 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
     RX_temp = 0.0;
     RX_fault = 0.0;
 
-    auto ids  = command.motor_adapters_[i].getIdx();
-    int port  = command.motor_adapters_[i].getPort();
-    auto sign = command.motor_adapters_[i].getSign();
+    auto ids  = command_.motor_adapters_[i].getIdx();
+    int port  = command_.motor_adapters_[i].getPort();
+    auto sign = command_.motor_adapters_[i].getSign();
 
     // call ylo2 moteus lib
   /*
-    command.read_moteus_RX_queue(ids, port, 
-                                  RX_pos, RX_vel, RX_tor, 
+    command_.read_moteus_RX_queue(ids, port,
+                                  RX_pos, RX_vel, RX_tor,
                                   RX_volt, RX_temp, RX_fault);  // query values;
 */
     //usleep(10); // TODO : test and reduce pause !
@@ -95,35 +102,17 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
     //usleep(200); // TODO : test and reduce pause !
   }
 
-  // TODO
-  // imu_message contains the real imu topic msg
-  // read imu message, and store values into legged controller
-  //ROS_INFO("read imu => [%f]", imuorientx);
-  /*
-  imu_message = imu_callback(); _// read imu full message_
-
-  imuData_.ori_[0]        = imu_message->orientation.x;
-  imuData_.ori_[1]        = imu_message->orientation.y;
-  imuData_.ori_[2]        = imu_message->orientation.z;
-  imuData_.ori_[3]        = imu_message->orientation.w; // TODO : is this 4rd index w, or x ?
-
-  imuData_.angularVel_[0] = imu_message->angular_velocity.x;
-  imuData_.angularVel_[1] = imu_message->angular_velocity.y;
-  imuData_.angularVel_[2] = imu_message->angular_velocity.z;
-  imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
-  imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
-  imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
-  */
-  imuData_.ori_[0] = 0.0000001;
-  imuData_.ori_[1] = 0.0000001;
-  imuData_.ori_[2] = 0.0000001;
-  imuData_.ori_[3] = 1.0;
-  imuData_.angularVel_[0] = 0.0000001;
-  imuData_.angularVel_[1] = 0.0000001;
-  imuData_.angularVel_[2] = 0.0000001;
-  imuData_.linearAcc_[0] = 0.0000001;
-  imuData_.linearAcc_[1] = 0.0000001;
-  imuData_.linearAcc_[2] = 0.0000001;
+  // This is deprecetad since we fetch imu data in the callback
+  // imuData_.ori_[0] = 0.0000001;
+  // imuData_.ori_[1] = 0.0000001;
+  // imuData_.ori_[2] = 0.0000001;
+  // imuData_.ori_[3] = 1.0;
+  // imuData_.angularVel_[0] = 0.0000001;
+  // imuData_.angularVel_[1] = 0.0000001;
+  // imuData_.angularVel_[2] = 0.0000001;
+  // imuData_.linearAcc_[0] = 0.0000001;
+  // imuData_.linearAcc_[1] = 0.0000001;
+  // imuData_.linearAcc_[2] = 0.0000001;
 
   // Set feedforward and velocity cmd to zero to avoid for safety when not controller setCommand
   std::vector<std::string> names = hybridJointInterface_.getNames();
@@ -138,10 +127,10 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
 void UnitreeHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   //ROS_INFO("write function");
   for (int i = 0; i < 12; ++i) {
-    auto ids  = command.motor_adapters_[i].getIdx(); // moteus controller id
-    int port  = command.motor_adapters_[i].getPort(); // select correct port on Peak canfd board
-    auto sign = command.motor_adapters_[i].getSign(); // in case of joint reverse rotation
-    
+    auto ids  = command_.motor_adapters_[i].getIdx(); // moteus controller id
+    int port  = command_.motor_adapters_[i].getPort(); // select correct port on Peak canfd board
+    auto sign = command_.motor_adapters_[i].getSign(); // in case of joint reverse rotation
+
     joint_position = static_cast<float>(jointData_[i].posDes_);;
     joint_velocity = static_cast<float>(jointData_[i].velDes_);
     joint_fftorque = static_cast<float>(jointData_[i].ff_);
@@ -150,8 +139,8 @@ void UnitreeHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/
 
     // call ylo2 moteus lib
 /*
-    command.send_moteus_TX_frame(ids, port, 
-                                joint_position, joint_velocity, joint_fftorque, joint_kp, joint_kd); 
+    command_.send_moteus_TX_frame(ids, port,
+                                joint_position, joint_velocity, joint_fftorque, joint_kp, joint_kd);
     //usleep(120); // TODO : test and reduce pause !
 */
   }
@@ -194,6 +183,7 @@ bool UnitreeHW::setupJoints() {
   return true;
 }
 
+// imuSensorInterface_ miising from the header, not sure this will compile
 bool UnitreeHW::setupImu() {
   imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("unitree_imu", "unitree_imu", imuData_.ori_, imuData_.oriCov_,
                                                                          imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,

@@ -77,7 +77,7 @@ class UnitreeHW : public LeggedHW {
   bool startup_routine();
 
   // imu callback
-  void ImuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
+  void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
 
   bool setupJoints();
 
@@ -91,6 +91,8 @@ class UnitreeHW : public LeggedHW {
 
   int powerLimit_{};
   int contactThreshold_{};
+
+  YloTwoPcanToMoteus command_; // instance of class YloTwoPcanToMoteus
 };
 
 }  // namespace legged
