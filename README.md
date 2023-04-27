@@ -24,11 +24,11 @@ https://github.com/qiayuanliao/legged_control.git
 
 - [x] Peak 4 can working
 
-- [ ] Realsense D435
+- [x] Realsense D435
 
-- [ ] Realsense T265
+- [x] Realsense T265
 
-- [ ] Myahrs+ IMU
+- [x] Myahrs+ IMU
 
 - [x] GPIO security switch
 
