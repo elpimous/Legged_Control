@@ -1,14 +1,31 @@
 <launch>
-    <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]"/>
+    <arg name="robot_type" default="a1" doc="Robot type: [a1, aliengo, go1, laikago]"/>
 
-    <param name="legged_robot_description" command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/robot.xacro
-       robot_type:=$(arg robot_type)
-    "/>
+    <!-- Launch the imu node -->
+    <node pkg="quad_imu" type="quad_imu" name="quad_imu">
+        <param name="port" value="/dev/ttyACM0" />
+        <param name="baud_rate" value="115200" />
+        <param name="frame_id" value="unitree_imu" />
+        <param name="use_gui" value="true" />
+    </node>
+    
+    <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="0 0 0 0 0 0 base unitree_imu 30" />
+
+    <!-- Call Ylo2 robot under A1 naming -->
+    <param name="legged_robot_description" command="$(find xacro)/xacro $(find legged_ylo2_description)/urdf/ylo2.xacro
+       robot_type:=$(arg robot_type) "/>
+
+    
+    
+    <node name="generate_urdf" pkg="legged_common" type="generate_urdf.sh" output="screen"
+          args="$(find legged_ylo2_description)/urdf/ylo2.xacro $(arg robot_type)"/>
 
     <rosparam file="$(find legged_unitree_hw)/config/$(arg robot_type).yaml" command="load"/>
 
     <param name="robot_type" value="$(arg robot_type)"/>
     <node name="legged_unitree_hw" pkg="legged_unitree_hw" type="legged_unitree_hw" respawn="false"
-          clear_params="true"/>
+          clear_params="true" output="screen" />
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find legged_ylo2_description)/launch/hardware.rviz" required="true"/>
 
 </launch>

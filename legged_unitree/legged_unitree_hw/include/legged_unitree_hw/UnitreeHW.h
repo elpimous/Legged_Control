@@ -1,3 +1,4 @@
+
 //
 // Created by qiayuan on 1/24/22.
 //
@@ -6,6 +7,7 @@
 
 #include <legged_hw/LeggedHW.h>
 #include <sensor_msgs/Imu.h>
+#include "moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
 
 namespace legged {
 const std::vector<std::string> CONTACT_SENSOR_NAMES = {"RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"};
@@ -36,7 +38,6 @@ class UnitreeHW : public LeggedHW {
    * @param robot_hw_nh Node-handle for robot hardware.
    * @return True when init successful, False when failed.
    */
-
   bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
   /** \brief Communicate with hardware. Get data, status of robot.
    *
@@ -81,7 +82,7 @@ class UnitreeHW : public LeggedHW {
 
   bool setupJoints();
 
-  // bool setupImu();
+  bool setupImu();
 
   bool setupContactSensor(ros::NodeHandle& nh);
 

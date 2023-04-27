@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(legged_unitree_hw)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 find_package(catkin REQUIRED
         COMPONENTS
         roscpp
-        sensor_msgs
         legged_hw
         )
 
@@ -33,7 +30,7 @@ add_subdirectory(moteus_driver)
 
 link_directories(lib)
 
-#set(EXTRA_LIBS)
+set(EXTRA_LIBS)
 
 ## Declare cpp executables
 add_executable(${PROJECT_NAME}
@@ -41,6 +38,7 @@ add_executable(${PROJECT_NAME}
         src/UnitreeHW.cpp
         )
 
+## Specify libraries to link executable targets against
 target_link_libraries(${PROJECT_NAME}
         ${catkin_LIBRARIES}
         ${EXTRA_LIBS}
