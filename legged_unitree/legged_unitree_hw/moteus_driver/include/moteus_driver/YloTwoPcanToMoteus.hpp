@@ -11,6 +11,11 @@
 #include <unistd.h>
 #include <ros/ros.h>
 #include <PCANBasic.h> // Peak m2canFd board lib
+#include "mraa/common.hpp"
+#include "mraa/gpio.hpp" // for GPIO security switch
+
+// define GPIO switch port
+#define BTN_PIN      29
 
 //define pcan 4 ports to their respective physical adress
 #define PCAN_DEV1	PCAN_PCIBUS1
@@ -80,26 +85,37 @@ struct MotorAdapter{
 // the YloTwoPcanToMoteus class
 class YloTwoPcanToMoteus{
   public:
-    /* PEAK BOARD M2 4 CANFD PORTS
-       initialize and reset all 4 ports*/
-    bool init_and_reset();
 
-    /* zero each moteus controller*/
+    /* SECURITY RED SWITCH
+      wires diagram : 
+        - black is ground (pin 1); 
+        - red is +3.3vcc with 10k resistor (pin 6); 
+        - white is gpio read (pin 29)*/
+    bool security_switch();
+
+    /* PEAK BOARD M2 4 CANFD PORTS
+       initialize all 4 ports*/
+    bool Can_init();
+
+    /* reset all 4 ports*/
+    bool Can_reset();
+
+    /* zero a single moteus controller*/
     bool send_moteus_zero_order(int id, int port, float position);
 
-    /* send a canFD STOP frame command, 
+    /* send a single canFD STOP frame command, 
        and query informations about moteus controller*/
     bool send_moteus_stop_order(int id, int port);
 
-    /* send a canFD TORQUE frame
+    /* send a single canFD TORQUE frame
        and query informations about moteus controller*/
     bool send_moteus_TX_frame(int id, int port, float pos, float vel, float fftorque, float kp, float kd);
 
-    /* query canFD RX Queue, 
+    /* query a single canFD RX Queue, 
        and read ID params*/
     bool read_moteus_RX_queue(int id, int port, float& position, float& velocity, float& torque, float& voltage, float& temperature, float& fault);
 
-    /* send a canFD command frame
+    /* send a single canFD command frame
        ask informations about moteus power board*/
     bool send_power_board_order();
 
@@ -139,10 +155,22 @@ class YloTwoPcanToMoteus{
     float RX_fault = 0;
 
 
-  private:
+    float _comm_position      = 0.0; // NAN for torque mode
+    float _comm_fftorque      = 0.0; // variable Tau
+    float _comm_velocity      = 0;
+    float _comm_kp            = 0;
+    float _comm_kd            = 0;
+    float _comm_maxtorque     = 0.1; // Max possible torque is NAN value
 
+
+    // for mraa library GPIO (security switch)
+    mraa_gpio_context btnPin; //  Will be used to represnt the button pin     //TODO create private class
+
+  private:
+    
     // for pcanbasic library
     TPCANStatus Status; // the return of a command, to check success
+
     // Define the compatible Moteus FD Bitrate string
     TPCANBitrateFD BitrateFD = (char*) "f_clock_mhz = 80, nom_brp = 1, nom_tseg1 = 50, nom_tseg2 = 29, nom_sjw = 10, data_brp = 1, data_tseg1 = 8, data_tseg2 = 7, data_sjw = 12";
     TPCANTimestampFD timestamp;
@@ -163,12 +191,7 @@ class YloTwoPcanToMoteus{
     int stop_pos_low_;
     int stop_pos_high_;
 
-    float _comm_position      = NAN; // NAN for torque mode
-    float _comm_fftorque      = 0.0; // variable Tau
-    float _comm_velocity      = 0;
-    float _comm_kp            = 0;
-    float _comm_kd            = 0;
-    float _comm_maxtorque     = 0.1; // Max possible torque is NAN value
+
 
     /* query variables for moteus controllers */
     float _position     = 0.0;
@@ -189,13 +212,21 @@ class YloTwoPcanToMoteus{
     float _board_temp     = 0.0;
     float _energy         = 0.0;
 
-    //  zero position of controllers, to check
-    std::vector<float>initial_ground_joints_pose = {-0.051290, -0.186801, 0.401529,  //  3, 1, 2
-                                                     0.049744, -0.186188, 0.434385,  //  9, 7, 8
-                                                     0.056091, 0.180545, -0.428597,  //  6, 4, 5
-                                                    -0.056315, 0.184779, -0.423850}; // 12, 10, 11
+    //  zero position of controllers, to check . robot position is sitted 
+    std::vector<float>initial_ground_joints_pose = {0.05833955109119415, 0.1817300021648407, -0.4297744333744049,  // 6, 4, 5
+                                                    -0.05806489288806915, -0.1830422580242157, 0.3962658643722534, // 3, 1, 2
+                                                    -0.06296806037425995, 0.18036942183971405, -0.4263542890548706, // 12, 10, 11
+                                                    0.055633656680583954, -0.18656450510025024, 0.4280807077884674};   // 9, 7, 8
 
-    float calibration_error = 0.018; // 9 degrees
+    /*
+    //  zero position of controllers, to check . robot position is flat , legs parallel to ground 
+    std::vector<float>initial_ground_joints_pose = {-0.04470834136009216, -0.23226720094680786, -0.016191745176911354,  // 6, 4, 5
+                                                    0.043558843433856964, 0.2334344983100891, 0.012834228575229645, // 3, 1, 2
+                                                    0.042348310351371765, 0.23093968629837036, 0.009475702419877052, // 12, 10, 11
+                                                    -0.044545579701662064, -0.2332564890384674, -0.011594492942094803};   // 9, 7, 8
+    */
+
+    float calibration_error = 0.015; // 3 degrees
 };
 
 #endif // PCANTOMOTEUS_HPP
