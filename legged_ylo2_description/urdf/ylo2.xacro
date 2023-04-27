@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+
+    <xacro:arg name="robot_type" default="a1"/>
+
+    <xacro:include filename="$(find legged_ylo2_description)/urdf/common/materials.xacro"/>
+    <xacro:include filename="$(find legged_ylo2_description)/urdf/common/leg.xacro"/>
+    <xacro:include filename="$(find legged_ylo2_description)/urdf/common/gazebo.xacro"/>
+    <xacro:include filename="$(find legged_ylo2_description)/urdf/common/imu.xacro"/>
+
+    <xacro:include filename="$(find legged_ylo2_description)/urdf/$(arg robot_type)/const.xacro"/>
+
+
+    <link name="base">
+        <visual>
+            <origin rpy="0 0 0" xyz="${body_center_x} ${body_center_y} ${body_center_z}"/>
+            <geometry>
+                <mesh filename="package://legged_ylo2_description/meshes/body/textured/ylo2_textured_body.dae" scale="1 1 1"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="${body_center_x} ${body_center_y} ${body_center_z}"/>
+            <geometry>
+                <box size="${trunk_length} ${trunk_width} ${trunk_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="${trunk_mass}"/>
+            <inertia
+                    ixx="${trunk_ixx}" ixy="${trunk_ixy}" ixz="${trunk_ixz}"
+                    iyy="${trunk_iyy}" iyz="${trunk_iyz}"
+                    izz="${trunk_izz}"/>
+        </inertial>
+    </link>
+
+    <link name="abad_motors">
+        <visual>
+            <origin rpy="0 0 0" xyz="${body_center_x} ${body_center_y} ${body_center_z}"/>
+            <geometry>
+                <mesh filename="package://legged_ylo2_description/meshes/body/textured/ylo2_textured_abad_motors.dae" scale="1 1 1"/>
+            </geometry>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="0.001"/>
+            <inertia
+                    ixx="0.0" ixy="0.0" ixz="0.0"  iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+    </link>
+
+    <joint name="abad_motors_joint" type="fixed">
+        <parent link="base"/>
+        <child link="abad_motors"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="covers">
+        <visual>
+            <origin rpy="0 0 0" xyz="${body_center_x} ${body_center_y} ${body_center_z}"/>
+            <geometry>
+                <mesh filename="package://legged_ylo2_description/meshes/body/textured/ylo2_textured_cover.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="orange"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="0.001"/>
+            <inertia
+                    ixx="0.0" ixy="0.0" ixz="0.0"  iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+    </link>
+
+    <joint name="covers_joint" type="fixed">
+        <parent link="base"/>
+        <child link="covers"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="accessories">
+        <visual>
+            <origin rpy="0 0 0" xyz="${body_center_x} ${body_center_y} ${body_center_z}"/>
+            <geometry>
+                <mesh filename="package://legged_ylo2_description/meshes/body/textured/accessories.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="0.001"/>
+            <inertia
+                    ixx="0.0" ixy="0.0" ixz="0.0"  iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+    </link>
+
+    <joint name="accessories_joint" type="fixed">
+        <parent link="base"/>
+        <child link="accessories"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <!-- CAMERAS -->
+    <link name="d435">
+        <visual>
+            <origin rpy="0 0 0" xyz="${body_center_x} ${body_center_y+0.003} ${body_center_z}"/>
+            <geometry>
+                <mesh filename="package://legged_ylo2_description/meshes/body/textured/ylo2_d435_textured.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="0.001"/>
+            <inertia
+                    ixx="0.0" ixy="0.0" ixz="0.0"  iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+    </link>
+
+    <joint name="d435_joint" type="fixed">
+        <parent link="base"/>
+        <child link="d435"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="t265">
+        <visual>
+            <origin rpy="0 0 0" xyz="${body_center_x+0.002} ${body_center_y+0.0025} ${body_center_z}"/>
+            <geometry>
+                <mesh filename="package://legged_ylo2_description/meshes/body/textured/ylo2_t265_textured.dae" scale="1 1.06 1.04"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="0.001"/>
+            <inertia
+                    ixx="0.0" ixy="0.0" ixz="0.0"  iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+    </link>
+
+    <joint name="t265_joint" type="fixed">
+        <parent link="base"/>
+        <child link="t265"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <xacro:IMU connected_to="base" imu_name="unitree_imu" xyz="0. 0. 0." rpy="0. 0. 0."/>
+
+    <xacro:leg prefix="RF" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True">
+        <origin rpy="0 0 0" xyz="${leg_offset_x+0.0345} ${-leg_offset_y+0.005} ${leg_offset_z}"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="LF" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True">
+        <origin rpy="0 0 0" xyz="${leg_offset_x+0.0345} ${leg_offset_y+0.006} ${leg_offset_z}"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="RH" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False">
+        <origin rpy="0 0 0" xyz="${-leg_offset_x-0.0745} ${-leg_offset_y+0.005} ${leg_offset_z}"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="LH" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False">
+        <origin rpy="0 0 0" xyz="${-leg_offset_x-0.0745} ${leg_offset_y+0.006} ${leg_offset_z}"/>
+    </xacro:leg>
+
+</robot>
