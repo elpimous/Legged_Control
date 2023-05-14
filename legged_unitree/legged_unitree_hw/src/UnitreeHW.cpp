@@ -41,6 +41,8 @@ void UnitreeHW::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
   imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
   imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
   imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
+
+  //ROS_INFO("****************** Imu Orientation x: [%f]", imu_message->orientation.x);
 }
 
 
@@ -53,6 +55,7 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
   // Imu subscriber
   ros::Subscriber sub = root_nh.subscribe("imu/data", 1000, &UnitreeHW::imuCallback, this);
+
 
   while (!UnitreeHW::startup_routine()){};
 
@@ -75,6 +78,8 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
 void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   //ROS_INFO("read function");
+
+  std::cout << imuData_.ori_[0] << std::endl;
 
   // read the 12 joints, and store values into legged controller
   for (int i = 0; i < 12; ++i) {
@@ -101,7 +106,6 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
     jointData_[i].vel_ = static_cast<double>(RX_vel*2*M_PI);        // moteus turns to radians
     jointData_[i].tau_ = static_cast<double>(RX_tor);               // measured in N*m
 
-    //ROS_INFO("****************** Imu Orientation x: [%f]", imuData_.ori_[0]);
 
     // TODO read volt, temp, faults for Diagnostics
 
@@ -185,6 +189,7 @@ bool UnitreeHW::setupJoints() {
   return true;
 }
 
+
 bool UnitreeHW::setupImu() {
    imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("unitree_imu", "unitree_imu", imuData_.ori_, imuData_.oriCov_,
                                                                           imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,
@@ -200,6 +205,7 @@ bool UnitreeHW::setupImu() {
    ROS_INFO("setupImu() OK.");
    return true;
 }
+
 
 bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh) {
   nh.getParam("contact_threshold", contactThreshold_);
