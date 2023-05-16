@@ -232,9 +232,10 @@ bool YloTwoPcanToMoteus::read_moteus_RX_queue(int id, int port, float& position,
         temperature = _temperature;
         fault       = _fault;
         return true;}
-    else
+    else{
         std::cout << "### RX queue is empty for ID " << id << "." << std::endl;
         return false;
+    }
 }
 
 
