@@ -80,7 +80,7 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
   //ROS_INFO("read function");
 
   std::cout << imuData_.ori_[0] << std::endl;
-
+  
   // read the 12 joints, and store values into legged controller
   for (int i = 0; i < 12; ++i) {
 
@@ -111,6 +111,18 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
 
     usleep(150); // TODO : test and reduce pause !
   }
+  
+  // This is deprecetad since we fetch imu data in the callback
+  // imuData_.ori_[0] = 0.0000001;
+  // imuData_.ori_[1] = 0.0000001;
+  // imuData_.ori_[2] = 0.0000001;
+  // imuData_.ori_[3] = 1.0;
+  // imuData_.angularVel_[0] = 0.0000001;
+  // imuData_.angularVel_[1] = 0.0000001;
+  // imuData_.angularVel_[2] = 0.0000001;
+  // imuData_.linearAcc_[0] = 0.0000001;
+  // imuData_.linearAcc_[1] = 0.0000001;
+  // imuData_.linearAcc_[2] = 0.0000001;
   
 
   // Set feedforward and velocity cmd to zero to avoid for safety when not controller setCommand
@@ -205,6 +217,7 @@ bool UnitreeHW::setupImu() {
    ROS_INFO("setupImu() OK.");
    return true;
 }
+
 
 
 bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh) {
