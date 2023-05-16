@@ -160,7 +160,7 @@ class YloTwoPcanToMoteus{
     float _comm_velocity      = 0;
     float _comm_kp            = 0;
     float _comm_kd            = 0;
-    float _comm_maxtorque     = 0.1; // Max possible torque is NAN value
+    float _comm_maxtorque     = 0.0; // Max possible torque is NAN value
 
 
     // for mraa library GPIO (security switch)
@@ -216,7 +216,7 @@ class YloTwoPcanToMoteus{
     std::vector<float>initial_ground_joints_pose = {0.05833955109119415, 0.1817300021648407, -0.4297744333744049,  // 6, 4, 5
                                                     -0.05806489288806915, -0.1830422580242157, 0.3962658643722534, // 3, 1, 2
                                                     -0.06296806037425995, 0.18036942183971405, -0.4263542890548706, // 12, 10, 11
-                                                    0.055633656680583954, -0.18656450510025024, 0.4280807077884674};   // 9, 7, 8
+                                                    0.055633656680583954, -0.18712398409843445, 0.4280807077884674};   // 9, 7, 8
 
     /*
     //  zero position of controllers, to check . robot position is flat , legs parallel to ground 
