@@ -28,10 +28,6 @@ include_directories(
 # Motors driver
 add_subdirectory(moteus_driver)
 
-link_directories(lib)
-
-set(EXTRA_LIBS)
-
 ## Declare cpp executables
 add_executable(${PROJECT_NAME}
         src/legged_unitree_hw.cpp
@@ -41,7 +37,6 @@ add_executable(${PROJECT_NAME}
 ## Specify libraries to link executable targets against
 target_link_libraries(${PROJECT_NAME}
         ${catkin_LIBRARIES}
-        ${EXTRA_LIBS}
         moteus_driver
         )
 
@@ -78,6 +73,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
         )
 
 # Mark other files for installation
-install(DIRECTORY config launch lib
+install(DIRECTORY config launch
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
