@@ -37,6 +37,7 @@
 #include <sensor_msgs/MagneticField.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
+#include "imu_service/ImuService.h"
 
 //------------------------------------------------------------------------------
 using namespace WithRobot;
@@ -48,9 +49,9 @@ private:
   ros::NodeHandle nh_;
   ros::NodeHandle nh_priv_;
 
-  ros::Publisher imu_data_raw_pub_;
+  //ros::Publisher imu_data_raw_pub_;
   ros::Publisher imu_data_pub_;
-  ros::Publisher imu_mag_pub_;
+  //ros::Publisher imu_mag_pub_;
   ros::Publisher imu_temperature_pub_;
 
   tf::TransformBroadcaster broadcaster_;
@@ -96,9 +97,9 @@ public:
     nh_priv_.param("magnetic_field_stddev", magnetic_field_stddev_, 0.00000327486);
     nh_priv_.param("orientation_stddev", orientation_stddev_, 0.002143);
     // publisher for streaming
-    imu_data_raw_pub_   = nh_.advertise<sensor_msgs::Imu>("imu/data_raw", 1);
+    //imu_data_raw_pub_   = nh_.advertise<sensor_msgs::Imu>("imu/data_raw", 1);
     imu_data_pub_       = nh_.advertise<sensor_msgs::Imu>("imu/data", 1);
-    imu_mag_pub_        = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 1);
+    //imu_mag_pub_        = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 1);
     imu_temperature_pub_= nh_.advertise<std_msgs::Float64>("imu/temperature", 1);
   }
 
@@ -144,6 +145,7 @@ public:
     sensor_msgs::MagneticField imu_magnetic_msg;
     std_msgs::Float64 imu_temperature_msg;
 
+	
     double linear_acceleration_cov = linear_acceleration_stddev_ * linear_acceleration_stddev_;
     double angular_velocity_cov    = angular_velocity_stddev_ * angular_velocity_stddev_;
     double magnetic_field_cov      = magnetic_field_stddev_ * magnetic_field_stddev_;
@@ -202,25 +204,42 @@ public:
 
     // orientation
     imu_data_msg.orientation.x = orientation[0];
+    res.x_orientation = imu_data_msg.orientation.x;
+    
     imu_data_msg.orientation.y = orientation[1];
+    res.y_orientation = imu_data_msg.orientation.y;
+    
     imu_data_msg.orientation.z = orientation[2];
+    res.z_orientation = imu_data_msg.orientation.z;
+    
     imu_data_msg.orientation.w = orientation[3];
+    res.w_orientation = imu_data_msg.orientation.w;
 
     // original data used the g unit, convert to m/s^2
     imu_data_raw_msg.linear_acceleration.x =
     imu_data_msg.linear_acceleration.x     =  imu.ax * convertor_g2a;
+    res.x_linear_acceleration = imu_data_msg.linear_acceleration.x;
+    
     imu_data_raw_msg.linear_acceleration.y =
     imu_data_msg.linear_acceleration.y     = -imu.ay * convertor_g2a;
+    res.y_linear_acceleration = imu_data_msg.linear_acceleration.y;
+    
     imu_data_raw_msg.linear_acceleration.z =
     imu_data_msg.linear_acceleration.z     = -imu.az * convertor_g2a;
-
+    res.z_linear_acceleration = imu_data_msg.linear_acceleration.z;
+  
     // original data used the degree/s unit, convert to radian/s
     imu_data_raw_msg.angular_velocity.x =
     imu_data_msg.angular_velocity.x     =  imu.gx * convertor_d2r;
+    res.x_angular_velocity = imu_data_msg.angular_velocity.x;
+    
     imu_data_raw_msg.angular_velocity.y =
     imu_data_msg.angular_velocity.y     = -imu.gy * convertor_d2r;
+    res.y_angular_velocity = imu_data_msg.angular_velocity.y;
+    
     imu_data_raw_msg.angular_velocity.z =
     imu_data_msg.angular_velocity.z     = -imu.gz * convertor_d2r;
+    res.z_angular_velocity = imu_data_msg.angular_velocity.z;
 
     // original data used the uTesla unit, convert to Tesla
     imu_magnetic_msg.magnetic_field.x =  imu.mx / convertor_ut2t;
@@ -231,9 +250,9 @@ public:
     imu_temperature_msg.data = imu.temperature;
 
     // publish the IMU data
-    imu_data_raw_pub_.publish(imu_data_raw_msg);
+    //imu_data_raw_pub_.publish(imu_data_raw_msg);
     imu_data_pub_.publish(imu_data_msg);
-    imu_mag_pub_.publish(imu_magnetic_msg);
+    //imu_mag_pub_.publish(imu_magnetic_msg);
     imu_temperature_pub_.publish(imu_temperature_msg);
 
     // publish tf
@@ -245,6 +264,25 @@ public:
                                  frame_id_,
                                  parent_frame_id_));
     }
+    
+    // send imu values to service :
+    bool add(imu_service::ImuService::Request  &req, imu_service::ImuService::Response &res){
+    
+    	res.x_angular_velocity = imu_data_msg.angular_velocity.x;
+    	res.y_angular_velocity = imu_data_msg.angular_velocity.y;
+		res.z_angular_velocity = imu_data_msg.angular_velocity.z;
+		
+		res.x_linear_acceleration = imu_data_msg.linear_acceleration.x;
+        res.y_linear_acceleration = imu_data_msg.linear_acceleration.y;
+		res.z_linear_acceleration = imu_data_msg.linear_acceleration.z;
+		
+		res.x_orientation = imu_data_msg.orientation.x;
+		res.y_orientation = imu_data_msg.orientation.y;
+		res.z_orientation = imu_data_msg.orientation.z;
+		res.w_orientation = imu_data_msg.orientation.w;
+		
+		return true;
+	}  
   }
 };
 
@@ -253,7 +291,8 @@ public:
 int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "myahrs_driver");
-
+  // ros::NodeHandle n; // needed for service run ?
+  
   std::string port = std::string("/dev/ttyACM0");
   int baud_rate    = 115200;
 
@@ -272,6 +311,9 @@ int main(int argc, char* argv[])
     ROS_INFO("Initialization OK!\n");
   }
 
+  // run service :
+  ros::ServiceServer service = n.advertiseService("imuService", add);
+  
   ros::spin();
 
   return 0;

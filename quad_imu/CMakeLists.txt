@@ -10,6 +10,7 @@ project(quad_imu)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  genmsg
   sensor_msgs
   tf
 )
@@ -17,7 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################################################
 # Declare ROS messages, services and actions
 ################################################################################
+add_service_files(FILES ImuService.srv)
 
+generate_messages(DEPENDENCIES std_msgs)
 ################################################################################
 # Declare ROS dynamic reconfigure parameters
 ################################################################################

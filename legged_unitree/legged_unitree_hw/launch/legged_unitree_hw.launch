@@ -2,7 +2,7 @@
     <arg name="robot_type" default="a1" doc="Robot type: [a1, aliengo, go1, laikago]"/>
 
     <!-- Launch the imu node -->
-    <node pkg="quad_imu" type="quad_imu" name="unitree_imu">
+    <node pkg="ylo2_imu" type="ylo2_imu" name="unitree_imu">
         <param name="port" value="/dev/ttyACM0" />
         <param name="baud_rate" value="115200" />
         <param name="frame_id" value="unitree_imu" />
