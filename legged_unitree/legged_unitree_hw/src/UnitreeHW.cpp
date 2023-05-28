@@ -24,28 +24,6 @@ bool UnitreeHW::startup_routine()
 }
 
 
-// the imu callback
-// As a callback, it doesn't need to be manually called : it will wait for a signal on the topic it is subscribed to
-void UnitreeHW::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
-
-  //ROS_INFO("****************** Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
-          //imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
-  imuData_.ori_[0]        = imu_message->orientation.x;
-  imuData_.ori_[1]        = imu_message->orientation.y;
-  imuData_.ori_[2]        = imu_message->orientation.z;
-  imuData_.ori_[3]        = imu_message->orientation.w; // TODO : is this 4rd index w, or x ?
-
-  imuData_.angularVel_[0] = imu_message->angular_velocity.x;
-  imuData_.angularVel_[1] = imu_message->angular_velocity.y;
-  imuData_.angularVel_[2] = imu_message->angular_velocity.z;
-  imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
-  imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
-  imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
-
-  //ROS_INFO("****************** Imu Orientation x: [%f]", imu_message->orientation.x);
-}
-
-
 bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   if (!LeggedHW::init(root_nh, robot_hw_nh)) {
     return false;
@@ -54,7 +32,7 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   robot_hw_nh.getParam("power_limit", powerLimit_);
 
   // Imu subscriber
-  ros::Subscriber sub = root_nh.subscribe("imu/data", 1000, &UnitreeHW::imuCallback, this);
+  //ros::Subscriber sub = root_nh.subscribe("imu/data", 1000, &UnitreeHW::imuCallback, this);
 
 
   while (!UnitreeHW::startup_routine()){};
@@ -79,8 +57,6 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   //ROS_INFO("read function");
 
-  std::cout << imuData_.ori_[0] << std::endl;
-  
   // read the 12 joints, and store values into legged controller
   for (int i = 0; i < 12; ++i) {
 
@@ -111,19 +87,6 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
 
     usleep(150); // TODO : test and reduce pause !
   }
-  
-  // This is deprecetad since we fetch imu data in the callback
-  // imuData_.ori_[0] = 0.0000001;
-  // imuData_.ori_[1] = 0.0000001;
-  // imuData_.ori_[2] = 0.0000001;
-  // imuData_.ori_[3] = 1.0;
-  // imuData_.angularVel_[0] = 0.0000001;
-  // imuData_.angularVel_[1] = 0.0000001;
-  // imuData_.angularVel_[2] = 0.0000001;
-  // imuData_.linearAcc_[0] = 0.0000001;
-  // imuData_.linearAcc_[1] = 0.0000001;
-  // imuData_.linearAcc_[2] = 0.0000001;
-  
 
   // Set feedforward and velocity cmd to zero to avoid for safety when not controller setCommand
   std::vector<std::string> names = hybridJointInterface_.getNames();

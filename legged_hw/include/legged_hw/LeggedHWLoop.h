@@ -64,10 +64,6 @@ class LeggedHWLoop {  // NOLINT(cppcoreguidelines-special-member-functions)
 
   /** \brief Timed method that reads current hardware's state, runs the controller code once and sends the new commands
    * to the hardware.
-   *
-   * Timed method that reads current hardware's state, runs the controller code once and sends the new commands to the
-   * hardware.
-   *
    */
   void update();
 

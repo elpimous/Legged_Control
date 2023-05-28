@@ -30,30 +30,24 @@ class UnitreeHW : public LeggedHW {
  public:
   UnitreeHW() = default;
   /** \brief Get necessary params from param server. Init hardware_interface.
-   *
    * Get params from param server and check whether these params are set. Load urdf of robot. Set up transmission and
    * joint limit. Get configuration of can bus and create data pointer which point to data received from Can bus.
-   *
    * @param root_nh Root node-handle of a ROS node.
    * @param robot_hw_nh Node-handle for robot hardware.
    * @return True when init successful, False when failed.
    */
   bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
   /** \brief Communicate with hardware. Get data, status of robot.
-   *
-   * Call @ref UNITREE_LEGGED_SDK::UDP::Recv() to get robot's state.
-   *
+   * Call Recv() to get robot's state.
    * @param time Current time
    * @param period Current time - last time
    */
   void read(const ros::Time& time, const ros::Duration& period) override;
 
   /** \brief Comunicate with hardware. Publish command to robot.
-   *
    * Propagate joint state to actuator state for the stored
-   * transmission. Limit cmd_effort into suitable value. Call @ref UNITREE_LEGGED_SDK::UDP::Recv(). Publish actuator
+   * transmission. Limit cmd_effort into suitable value. Call Recv(). Publish actuator
    * current state.
-   *
    * @param time Current time
    * @param period Current time - last time
    */
@@ -72,13 +66,15 @@ class UnitreeHW : public LeggedHW {
   float joint_kp;
   float joint_kd;
 
+  UnitreeImuData imuData_{};
+
  private:
 
   /** @brief Executes the robot's startup routine */
   bool startup_routine();
 
-  // imu callback
-  void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
+  // imu callback for ylo2 robot
+  //void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
 
   bool setupJoints();
 
@@ -87,7 +83,7 @@ class UnitreeHW : public LeggedHW {
   bool setupContactSensor(ros::NodeHandle& nh);
 
   UnitreeMotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
-  UnitreeImuData imuData_{};
+  //UnitreeImuData imuData_{};
   bool contactState_[4]{};  // NOLINT(modernize-avoid-c-arrays)
 
   int powerLimit_{};
