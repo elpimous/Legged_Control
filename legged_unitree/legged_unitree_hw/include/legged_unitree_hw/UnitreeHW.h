@@ -66,8 +66,6 @@ class UnitreeHW : public LeggedHW {
   float joint_kp;
   float joint_kd;
 
-  UnitreeImuData imuData_{};
-
  private:
 
   /** @brief Executes the robot's startup routine */
@@ -83,7 +81,7 @@ class UnitreeHW : public LeggedHW {
   bool setupContactSensor(ros::NodeHandle& nh);
 
   UnitreeMotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
-  //UnitreeImuData imuData_{};
+  UnitreeImuData imuData_{};
   bool contactState_[4]{};  // NOLINT(modernize-avoid-c-arrays)
 
   int powerLimit_{};
