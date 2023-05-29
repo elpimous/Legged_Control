@@ -152,6 +152,24 @@ bool YloTwoPcanToMoteus::security_switch(){ // read Gpio port state.
 }
 
 
+void YloTwoPcanToMoteus::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
+
+    ylo2imuData_.ori_[0] = imu_message->orientation.x;
+    ylo2imuData_.ori_[1] = imu_message->orientation.y;
+    ylo2imuData_.ori_[2] = imu_message->orientation.z;
+    ylo2imuData_.ori_[3] = imu_message->orientation.w;
+
+    ylo2imuData_.angularVel_[0] = imu_message->angular_velocity.x;
+    ylo2imuData_.angularVel_[1] = imu_message->angular_velocity.y;
+    ylo2imuData_.angularVel_[2] = imu_message->angular_velocity.z;
+
+    ylo2imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
+    ylo2imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
+    ylo2imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
+
+    std::cout << "sortie du callback : " << ylo2imuData_.ori_[0] << std::endl; // FONCTIONNE sans coupures des threads
+}
+
 bool YloTwoPcanToMoteus::Can_reset(){
     for (unsigned int p = 0; p < 4; ++p){
         //reset ports

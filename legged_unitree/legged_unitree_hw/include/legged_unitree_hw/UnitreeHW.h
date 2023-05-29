@@ -37,6 +37,7 @@ class UnitreeHW : public LeggedHW {
    * @return True when init successful, False when failed.
    */
   bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
+
   /** \brief Communicate with hardware. Get data, status of robot.
    * Call Recv() to get robot's state.
    * @param time Current time
@@ -71,17 +72,14 @@ class UnitreeHW : public LeggedHW {
   /** @brief Executes the robot's startup routine */
   bool startup_routine();
 
-  // imu callback for ylo2 robot
-  //void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
-
   bool setupJoints();
 
   bool setupImu();
 
   bool setupContactSensor(ros::NodeHandle& nh);
 
-  UnitreeMotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
   UnitreeImuData imuData_{};
+  UnitreeMotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
   bool contactState_[4]{};  // NOLINT(modernize-avoid-c-arrays)
 
   int powerLimit_{};

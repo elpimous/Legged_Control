@@ -10,9 +10,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <ros/ros.h>
+
 #include <PCANBasic.h> // Peak m2canFd board lib
-#include "mraa/common.hpp"
-#include "mraa/gpio.hpp" // for GPIO security switch
+
+#include "mraa/common.hpp" // for GPIO security switch
+#include "mraa/gpio.hpp"
+
+#include <sensor_msgs/Imu.h> // for imu subscriber
 
 // define GPIO switch port
 #define BTN_PIN      29
@@ -82,8 +86,19 @@ struct MotorAdapter{
     int port_;
 };
 
+// a structure for ylo2 imu datas
+struct ImuStruct {
+  double ori_[4];
+  double oriCov_[9];
+  double angularVel_[3];
+  double angularVelCov_[9];
+  double linearAcc_[3];
+  double linearAccCov_[9];
+};
+
 // the YloTwoPcanToMoteus class
 class YloTwoPcanToMoteus{
+
   public:
 
     /* SECURITY RED SWITCH
@@ -96,6 +111,11 @@ class YloTwoPcanToMoteus{
     /* PEAK BOARD M2 4 CANFD PORTS
        initialize all 4 ports*/
     bool Can_init();
+
+    /* IMU CALLBACK
+        - receives imu values
+        - stores them on imu_message var */
+    void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
 
     /* reset all 4 ports*/
     bool Can_reset();
@@ -168,6 +188,9 @@ class YloTwoPcanToMoteus{
 
   private:
     
+    // for imu datas
+    ImuStruct ylo2imuData_{};
+
     // for pcanbasic library
     TPCANStatus Status; // the return of a command, to check success
 
@@ -226,7 +249,7 @@ class YloTwoPcanToMoteus{
                                                     -0.044545579701662064, -0.2332564890384674, -0.011594492942094803};   // 9, 7, 8
     */
 
-    float calibration_error = 0.015; // 3 degrees
+    float calibration_error = 0.005; // 1.8 degrees
 };
 
 #endif // PCANTOMOTEUS_HPP

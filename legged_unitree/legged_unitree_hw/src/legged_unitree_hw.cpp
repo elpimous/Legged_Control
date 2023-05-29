@@ -38,17 +38,6 @@
 #include <legged_hw/LeggedHWLoop.h>
 #include "legged_unitree_hw/UnitreeHW.h"
 
-
-void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
-
-  legged::UnitreeHW ylo2_imu_object;
-  ylo2_imu_object.imuData_.ori_[0] = imu_message->orientation.x;
-  ylo2_imu_object.imuData_.ori_[1] = imu_message->orientation.y;
-  ylo2_imu_object.imuData_.ori_[2] = imu_message->orientation.z;
-  ylo2_imu_object.imuData_.ori_[3] = imu_message->orientation.w;
-  //std::cout << "valeur :" << ylo2_imu_object.imuData_.ori_[0] << std::endl;
-}
-
 int main(int argc, char** argv) {
   ros::init(argc, argv, "legged_unitree_hw");
   ros::NodeHandle nh;
@@ -63,8 +52,8 @@ int main(int argc, char** argv) {
   ros::AsyncSpinner spinner(4);
   spinner.start();
 
-  // Imu subscriber
-  ros::Subscriber sub = nh.subscribe("imu/data", 1000, imuCallback);
+  YloTwoPcanToMoteus ylo2imuobject;
+  ros::Subscriber sub = nh.subscribe("imu/data", 1000, &YloTwoPcanToMoteus::imuCallback, &ylo2imuobject);
 
   try {
     // Create the hardware interface specific to your robot
