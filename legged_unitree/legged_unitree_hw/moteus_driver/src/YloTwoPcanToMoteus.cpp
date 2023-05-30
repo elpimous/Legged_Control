@@ -167,7 +167,12 @@ void YloTwoPcanToMoteus::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_messa
     ylo2imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
     ylo2imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
 
-    std::cout << "sortie du callback : " << ylo2imuData_.ori_[0] << std::endl; // FONCTIONNE sans coupures des threads
+    //std::cout << "sortie du callback : " << ylo2imuData_.ori_[0] << std::endl; // FONCTIONNE sans coupures des threads
+}
+
+ImuStruct YloTwoPcanToMoteus::imuValue(){ // methode public permettant de sortir le membre privé : ylo2imuData_
+    std::cout << "test sortie de ylo2imuData_" << ylo2imuData_.ori_[0] << std::endl;
+    return YloTwoPcanToMoteus::ylo2imuData_;
 }
 
 bool YloTwoPcanToMoteus::Can_reset(){

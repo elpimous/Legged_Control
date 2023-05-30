@@ -117,6 +117,9 @@ class YloTwoPcanToMoteus{
         - stores them on imu_message var */
     void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
 
+    /* IMU VALUES*/
+    ImuStruct imuValue();
+
     /* reset all 4 ports*/
     bool Can_reset();
 

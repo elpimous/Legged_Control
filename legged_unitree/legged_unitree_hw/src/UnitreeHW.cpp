@@ -57,7 +57,10 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   //ROS_INFO("read function");
 
-  std::cout << command_.ylo2imuData_.ori_[0] << std::endl; // error: ‘ImuStruct YloTwoPcanToMoteus::ylo2imuData_’ is private within this context
+  imuData_.ori_[0] = command_.imuValue().ori_[0];
+
+  // récupère le membre privé : ylo2imuData_, au moyen du return de la fonction public YloTwoPcanToMoteus::imuValue()
+  std::cout << imuData_.ori_[0] << std::endl; // pourquoi retourne 0 ????
 
   // read the 12 joints, and store values into legged controller
   for (int i = 0; i < 12; ++i) {

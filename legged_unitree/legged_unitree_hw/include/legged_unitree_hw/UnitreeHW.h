@@ -67,6 +67,8 @@ class UnitreeHW : public LeggedHW {
   float joint_kp;
   float joint_kd;
 
+  ImuStruct imu_values;
+  
  private:
 
   /** @brief Executes the robot's startup routine */
