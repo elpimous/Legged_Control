@@ -9,6 +9,25 @@
 
 namespace legged {
 
+void UnitreeHW::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
+
+  // ROS_INFO("****************** Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
+  //        imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
+
+  float imuorientx = imu_message->orientation.x;
+  imuData_.ori_[0]        = imu_message->orientation.x;
+  imuData_.ori_[1]        = imu_message->orientation.y;
+  imuData_.ori_[2]        = imu_message->orientation.z;
+  imuData_.ori_[3]        = imu_message->orientation.w; // TODO : is this 4rd index w, or x ?
+
+  imuData_.angularVel_[0] = imu_message->angular_velocity.x;
+  imuData_.angularVel_[1] = imu_message->angular_velocity.y;
+  imuData_.angularVel_[2] = imu_message->angular_velocity.z;
+  imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
+  imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
+  imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
+}
+
 bool UnitreeHW::startup_routine()
 {
   /* initialize GPIO pin */
@@ -31,10 +50,6 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
   robot_hw_nh.getParam("power_limit", powerLimit_);
 
-  // Imu subscriber
-  //ros::Subscriber sub = root_nh.subscribe("imu/data", 1000, &UnitreeHW::imuCallback, this);
-
-
   while (!UnitreeHW::startup_routine()){};
 
   setupJoints();
@@ -56,11 +71,6 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
 void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   //ROS_INFO("read function");
-
-  imuData_.ori_[0] = command_.imuValue().ori_[0];
-
-  // récupère le membre privé : ylo2imuData_, au moyen du return de la fonction public YloTwoPcanToMoteus::imuValue()
-  std::cout << imuData_.ori_[0] << std::endl; // pourquoi retourne 0 ????
 
   // read the 12 joints, and store values into legged controller
   for (int i = 0; i < 12; ++i) {
@@ -88,6 +98,8 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
     jointData_[i].tau_ = static_cast<double>(RX_tor);               // measured in N*m
 
 
+    // The imu variable is actualized into callback !
+    
     // TODO read volt, temp, faults for Diagnostics
 
     usleep(150); // TODO : test and reduce pause !

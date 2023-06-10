@@ -29,6 +29,7 @@ struct UnitreeImuData {
 class UnitreeHW : public LeggedHW {
  public:
   UnitreeHW() = default;
+
   /** \brief Get necessary params from param server. Init hardware_interface.
    * Get params from param server and check whether these params are set. Load urdf of robot. Set up transmission and
    * joint limit. Get configuration of can bus and create data pointer which point to data received from Can bus.
@@ -66,13 +67,21 @@ class UnitreeHW : public LeggedHW {
   float joint_fftorque;
   float joint_kp;
   float joint_kd;
+    
 
-  ImuStruct imu_values;
+  UnitreeImuData imuData_{}; // the imudatas
+  /** @brief The imu callback */
+  void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
   
  private:
 
+  //ros::ServiceClient imuServiceClient_;
+  
   /** @brief Executes the robot's startup routine */
   bool startup_routine();
+
+  /** @brief The imu callback */
+  //void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
 
   bool setupJoints();
 
@@ -80,7 +89,7 @@ class UnitreeHW : public LeggedHW {
 
   bool setupContactSensor(ros::NodeHandle& nh);
 
-  UnitreeImuData imuData_{};
+  //UnitreeImuData imuData_{}; // the imudatas
   UnitreeMotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
   bool contactState_[4]{};  // NOLINT(modernize-avoid-c-arrays)
 

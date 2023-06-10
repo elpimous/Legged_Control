@@ -52,9 +52,6 @@ int main(int argc, char** argv) {
   ros::AsyncSpinner spinner(4);
   spinner.start();
 
-  YloTwoPcanToMoteus ylo2imuobject;
-  ros::Subscriber sub = nh.subscribe("imu/data", 1000, &YloTwoPcanToMoteus::imuCallback, &ylo2imuobject);
-
   try {
     // Create the hardware interface specific to your robot
     std::shared_ptr<legged::UnitreeHW> unitreeHw = std::make_shared<legged::UnitreeHW>();
@@ -66,6 +63,9 @@ int main(int argc, char** argv) {
     // Start the control loop
     legged::LeggedHWLoop controlLoop(nh, unitreeHw);
 
+    // Imu subscriber
+    ros::Subscriber sub = nh.subscribe("imu/data", 1000, &legged::UnitreeHW::imuCallback, unitreeHw.get());
+    
     // Wait until shutdown signal received
     ros::waitForShutdown();
   } catch (const ros::Exception& e) {
