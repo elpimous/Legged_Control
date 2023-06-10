@@ -1,13 +1,13 @@
 
 //
 // Created by qiayuan on 1/24/22.
+// Modified elpimous12 for ylo2 robot
 //
 
-#pragma once
-
+#pragma once // directive de préprocesseur -> inclure le fichier d'en-tête une seule fois lors de la compilation
 #include <legged_hw/LeggedHW.h>
 #include <sensor_msgs/Imu.h>
-#include "moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2 library
+#include "moteus_driver/YloTwoPcanToMoteus.hpp" // ylo2-robot library
 
 namespace legged {
 const std::vector<std::string> CONTACT_SENSOR_NAMES = {"RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"};
@@ -28,6 +28,7 @@ struct UnitreeImuData {
 
 class UnitreeHW : public LeggedHW {
  public:
+
   UnitreeHW() = default;
 
   /** \brief Get necessary params from param server. Init hardware_interface.
@@ -35,26 +36,29 @@ class UnitreeHW : public LeggedHW {
    * joint limit. Get configuration of can bus and create data pointer which point to data received from Can bus.
    * @param root_nh Root node-handle of a ROS node.
    * @param robot_hw_nh Node-handle for robot hardware.
-   * @return True when init successful, False when failed.
-   */
+   * @return True when init successful, False when failed. */
   bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
+
 
   /** \brief Communicate with hardware. Get data, status of robot.
    * Call Recv() to get robot's state.
    * @param time Current time
-   * @param period Current time - last time
-   */
+   * @param period Current time - last time */
   void read(const ros::Time& time, const ros::Duration& period) override;
+
 
   /** \brief Comunicate with hardware. Publish command to robot.
    * Propagate joint state to actuator state for the stored
    * transmission. Limit cmd_effort into suitable value. Call Recv(). Publish actuator
    * current state.
    * @param time Current time
-   * @param period Current time - last time
-   */
+   * @param period Current time - last time */
   void write(const ros::Time& time, const ros::Duration& period) override;
 
+
+  // params for Mjbots QDD100 motors
+
+  // receive variables
   float RX_pos =   0;
   float RX_vel =   0;
   float RX_tor =   0;
@@ -62,6 +66,7 @@ class UnitreeHW : public LeggedHW {
   float RX_temp =  0;
   float RX_fault = 0;
 
+  // send orders variables
   float joint_position;
   float joint_velocity;
   float joint_fftorque;
@@ -69,19 +74,15 @@ class UnitreeHW : public LeggedHW {
   float joint_kd;
     
 
-  UnitreeImuData imuData_{}; // the imudatas
+  UnitreeImuData imuData_{}; // Imu datas structure
+
   /** @brief The imu callback */
   void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
   
  private:
-
-  //ros::ServiceClient imuServiceClient_;
   
   /** @brief Executes the robot's startup routine */
   bool startup_routine();
-
-  /** @brief The imu callback */
-  //void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message);
 
   bool setupJoints();
 
@@ -89,14 +90,13 @@ class UnitreeHW : public LeggedHW {
 
   bool setupContactSensor(ros::NodeHandle& nh);
 
-  //UnitreeImuData imuData_{}; // the imudatas
   UnitreeMotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
   bool contactState_[4]{};  // NOLINT(modernize-avoid-c-arrays)
 
   int powerLimit_{};
   int contactThreshold_{};
 
-  YloTwoPcanToMoteus command_; // instance of class YloTwoPcanToMoteus
+  YloTwoPcanToMoteus command_; // instance of class YloTwoPcanToMoteus, Ylo2 robot lib
 };
 
 }  // namespace legged

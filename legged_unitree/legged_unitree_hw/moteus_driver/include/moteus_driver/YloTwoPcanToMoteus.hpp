@@ -16,8 +16,6 @@
 #include "mraa/common.hpp" // for GPIO security switch
 #include "mraa/gpio.hpp"
 
-#include <sensor_msgs/Imu.h> // for imu subscriber
-
 // define GPIO switch port
 #define BTN_PIN      29
 
@@ -86,16 +84,6 @@ struct MotorAdapter{
     int port_;
 };
 
-// a structure for ylo2 imu datas
-struct ImuStruct {
-  double ori_[4];
-  double oriCov_[9];
-  double angularVel_[3];
-  double angularVelCov_[9];
-  double linearAcc_[3];
-  double linearAccCov_[9];
-};
-
 // the YloTwoPcanToMoteus class
 class YloTwoPcanToMoteus{
 
@@ -111,9 +99,6 @@ class YloTwoPcanToMoteus{
     /* PEAK BOARD M2 4 CANFD PORTS
        initialize all 4 ports*/
     bool Can_init();
-
-    /* IMU VALUES*/
-    ImuStruct imuValue();
 
     /* reset all 4 ports*/
     bool Can_reset();
@@ -149,8 +134,7 @@ class YloTwoPcanToMoteus{
 
     /*1/ zero joints with initial_ground_joints_pose vector
       2/ check angle error between asked rezero, and read position
-      3/ loop until success
-      4/ stand up robot */
+      3/ loop until success */
     bool check_initial_ground_pose();
 
     uint32_t _id; // ID of a moteus controller
@@ -178,14 +162,11 @@ class YloTwoPcanToMoteus{
     float _comm_velocity      = 0;
     float _comm_kp            = 0;
     float _comm_kd            = 0;
-    float _comm_maxtorque     = 1.0; // Max possible torque is NAN value
+    float _comm_maxtorque     = 0; // Max possible torque is NAN value
 
 
     // for mraa library GPIO (security switch)
-    mraa_gpio_context btnPin; //  Will be used to represnt the button pin     //TODO create private class
-
-    // for imu datas
-    ImuStruct ylo2imuData_{};
+    mraa_gpio_context btnPin; //  Will be used to represnt the button pin
 
   private:
 
@@ -247,7 +228,7 @@ class YloTwoPcanToMoteus{
                                                     -0.044545579701662064, -0.2332564890384674, -0.011594492942094803};   // 9, 7, 8
     */
 
-    float calibration_error = 0.01; // 1.8 degrees
+    float calibration_error = 0.01; // 3.6 degrees
 };
 
 #endif // PCANTOMOTEUS_HPP

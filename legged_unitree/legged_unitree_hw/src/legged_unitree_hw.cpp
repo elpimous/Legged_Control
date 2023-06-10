@@ -45,16 +45,15 @@ int main(int argc, char** argv) {
 
   // Run the hardware interface node
   // -------------------------------
-
   // We run the ROS loop in a separate thread as external calls, such
   // as service callbacks loading controllers, can block the (main) control loop
-
   ros::AsyncSpinner spinner(4);
   spinner.start();
 
   try {
     // Create the hardware interface specific to your robot
     std::shared_ptr<legged::UnitreeHW> unitreeHw = std::make_shared<legged::UnitreeHW>();
+
     // Initialize the hardware interface:
     // 1. retrieve configuration from rosparam
     // 2. initialize the hardware and interface it with ros_control
@@ -64,8 +63,8 @@ int main(int argc, char** argv) {
     legged::LeggedHWLoop controlLoop(nh, unitreeHw);
 
     // Imu subscriber
-    ros::Subscriber sub = nh.subscribe("imu/data", 1000, &legged::UnitreeHW::imuCallback, unitreeHw.get());
-    
+    ros::Subscriber sub = nh.subscribe("imu/data", 100, &legged::UnitreeHW::imuCallback, unitreeHw.get());
+
     // Wait until shutdown signal received
     ros::waitForShutdown();
   } catch (const ros::Exception& e) {

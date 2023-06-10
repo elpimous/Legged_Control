@@ -11,31 +11,38 @@ namespace legged {
 
 void UnitreeHW::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_message){
 
-  // ROS_INFO("****************** Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", imu_message->orientation.x,
-  //        imu_message->orientation.y,imu_message->orientation.z,imu_message->orientation.w);
-
-  float imuorientx = imu_message->orientation.x;
   imuData_.ori_[0]        = imu_message->orientation.x;
   imuData_.ori_[1]        = imu_message->orientation.y;
   imuData_.ori_[2]        = imu_message->orientation.z;
-  imuData_.ori_[3]        = imu_message->orientation.w; // TODO : is this 4rd index w, or x ?
+  imuData_.ori_[3]        = imu_message->orientation.w;
 
   imuData_.angularVel_[0] = imu_message->angular_velocity.x;
   imuData_.angularVel_[1] = imu_message->angular_velocity.y;
   imuData_.angularVel_[2] = imu_message->angular_velocity.z;
+
   imuData_.linearAcc_[0]  = imu_message->linear_acceleration.x;
   imuData_.linearAcc_[1]  = imu_message->linear_acceleration.y;
   imuData_.linearAcc_[2]  = imu_message->linear_acceleration.z;
+
+  imuData_.oriCov_[0] = imu_message->orientation_covariance[0];
+  imuData_.oriCov_[4] = imu_message->orientation_covariance[4];
+  imuData_.oriCov_[8] = imu_message->orientation_covariance[8];
+
+  imuData_.angularVelCov_[0] = imu_message->linear_acceleration_covariance[0];
+  imuData_.angularVelCov_[4] = imu_message->linear_acceleration_covariance[4];
+  imuData_.angularVelCov_[8] = imu_message->linear_acceleration_covariance[8];
 }
+
 
 bool UnitreeHW::startup_routine()
 {
-  /* initialize GPIO pin */
+  /* initialize GPIO pin, for security switch button */
   command_.btnPin = mraa_gpio_init(BTN_PIN);
   mraa_gpio_dir(command_.btnPin, MRAA_GPIO_IN);
 
   command_.peak_fdcan_board_initialization();
   usleep(100);
+
   command_.check_initial_ground_pose();
   std::cout << "startup_routine Done." << std::endl;
   usleep(3000000);
@@ -48,15 +55,17 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
     return false;
   }
 
-  robot_hw_nh.getParam("power_limit", powerLimit_);
+  robot_hw_nh.getParam("power_limit", powerLimit_); // 4
 
-  while (!UnitreeHW::startup_routine()){};
+  while (!UnitreeHW::startup_routine()){}; // run startup routine until success
 
   setupJoints();
   setupImu();
   setupContactSensor(robot_hw_nh);
 
   std::string robot_type;
+  robot_type = "a1";
+  /*
   root_nh.getParam("robot_type", robot_type);
   if (robot_type == "a1") {
     std::cout << "robot is : " << robot_type << std::endl;
@@ -66,11 +75,11 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
     ROS_FATAL("Unknown robot type: %s", robot_type.c_str());
     return false;
   }
+  */
   return true;
 }
 
 void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
-  //ROS_INFO("read function");
 
   // read the 12 joints, and store values into legged controller
   for (int i = 0; i < 12; ++i) {
@@ -83,26 +92,25 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
     RX_temp = 0.0;
     RX_fault = 0.0;
 
-    auto ids  = command_.motor_adapters_[i].getIdx();
-    int port  = command_.motor_adapters_[i].getPort();
-    auto sign = command_.motor_adapters_[i].getSign();
+    auto ids  = command_.motor_adapters_[i].getIdx(); // moteus controller id
+    int port  = command_.motor_adapters_[i].getPort(); // select correct port on Peak canfd board
+    auto sign = command_.motor_adapters_[i].getSign(); // in case of joint reverse rotation
 
     // call ylo2 moteus lib
     command_.read_moteus_RX_queue(ids, port, 
                                   RX_pos, RX_vel, RX_tor, 
-                                  RX_volt, RX_temp, RX_fault);  // query values;
+                                  RX_volt, RX_temp, RX_fault);      // query values;
 
-    // ex : jointData_ = [(pos_, vel_, tau_, posDes_, velDes_, kp_, kd_, ff_), (pos_, vel_, tau_, posDes_, velDes_, kp_, kd_, ff_),...]
-    jointData_[i].pos_ = static_cast<double>(sign*(RX_pos*2*M_PI)); // joint turns to radians
-    jointData_[i].vel_ = static_cast<double>(RX_vel*2*M_PI);        // moteus turns to radians
+    jointData_[i].pos_ = static_cast<double>(sign*(RX_pos*2*M_PI)); // conversion turns -> radians
+    jointData_[i].vel_ = static_cast<double>(RX_vel*2*M_PI);
     jointData_[i].tau_ = static_cast<double>(RX_tor);               // measured in N*m
 
 
     // The imu variable is actualized into callback !
-    
+
     // TODO read volt, temp, faults for Diagnostics
 
-    usleep(150); // TODO : test and reduce pause !
+    usleep(150); // needed
   }
 
   // Set feedforward and velocity cmd to zero to avoid for safety when not controller setCommand
@@ -128,17 +136,15 @@ void UnitreeHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/
     int port  = command_.motor_adapters_[i].getPort(); // select correct port on Peak canfd board
     auto sign = command_.motor_adapters_[i].getSign(); // in case of joint reverse rotation
     
-    joint_position = static_cast<float>(sign*(jointData_[i].posDes_/(2*M_PI))); // convert for moteus /turn value
-    joint_velocity = static_cast<float>(jointData_[i].velDes_/(2*M_PI)); // convert for moteus /turn value
+    joint_position = static_cast<float>(sign*(jointData_[i].posDes_/(2*M_PI))); // conversion radians -> turns
+    joint_velocity = static_cast<float>(jointData_[i].velDes_/(2*M_PI));
     joint_fftorque = static_cast<float>(jointData_[i].ff_);
     joint_kp       = static_cast<float>(jointData_[i].kp_);
     joint_kd       = static_cast<float>(jointData_[i].kd_);
     
-    //ROS_INFO(" Write ---> joint ID: [%d] ; pos: [%f] ; vel: [%f] ; fftorque: [%f] ; kp: [%f] ; kd: [%f]", ids, joint_position, joint_velocity, joint_fftorque, joint_kp, joint_kd);
-
     // call ylo2 moteus lib
     command_.send_moteus_TX_frame(ids, port, joint_position, joint_velocity, joint_fftorque, joint_kp, joint_kd); 
-    usleep(150); // TODO : test and reduce pause !
+    usleep(150); // needed
 
   }
 }
@@ -186,18 +192,10 @@ bool UnitreeHW::setupImu() {
    imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("unitree_imu", "unitree_imu", imuData_.ori_, imuData_.oriCov_,
                                                                           imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,
                                                                           imuData_.linearAccCov_));
-   imuData_.oriCov_[0] = 0.0012;
-   imuData_.oriCov_[4] = 0.0012;
-   imuData_.oriCov_[8] = 0.0012;
-
-   imuData_.angularVelCov_[0] = 0.0004;
-   imuData_.angularVelCov_[4] = 0.0004;
-   imuData_.angularVelCov_[8] = 0.0004;
 
    ROS_INFO("setupImu() OK.");
    return true;
 }
-
 
 
 bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh) {
