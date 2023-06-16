@@ -2,7 +2,7 @@ centroidalModelType             0      // 0: FullCentroidalDynamics, 1: Single R
 
 legged_robot_interface
 {
-  verbose                               false  // show the loaded parameters
+  verbose                               true  // show the loaded parameters
 }
 
 model_settings
@@ -160,18 +160,23 @@ initialState
    (11,0) 0.0     ; theta_base_x
 
    ;; Leg Joint Positions: [LF, LH, RF, RH] ;;
-   (12,0) -0.20   ; LF_HAA
-   (13,0)  0.72   ; LF_HFE
-   (14,0) -1.44   ; LF_KFE
-   (15,0) -0.20   ; LH_HAA
-   (16,0)  0.72   ; LH_HFE
-   (17,0) -1.44   ; LH_KFE
-   (18,0)  0.20   ; RF_HAA
-   (19,0)  0.72   ; RF_HFE
-   (20,0) -1.44   ; RF_KFE
-   (21,0)  0.20   ; RH_HAA
-   (22,0)  0.72   ; RH_HFE
-   (23,0) -1.44   ; RH_KFE
+   ;; paramètres réels de ylo2 en initial pose ;;
+
+   (12,0) -0.37   ; LF_HAA ; 3
+   (13,0) -1.15   ; LF_HFE ; 1
+   (14,0)  2.64   ; LF_KFE ; 2
+
+   (15,0)  0.37   ; LH_HAA ; 9
+   (16,0) -1.15   ; LH_HFE ; 7
+   (17,0)  2.64   ; LH_KFE ; 8
+
+   (18,0)  0.37   ; RF_HAA ; 6
+   (19,0)  1.15   ; RF_HFE ; 4
+   (20,0) -2.64   ; RF_KFE ; 5
+
+   (21,0) -0.37   ; RH_HAA ; 12
+   (22,0)  1.15   ; RH_HFE ; 10
+   (23,0) -2.64   ; RH_KFE ; 11
 }
 
 ; standard state weight matrix
@@ -304,4 +309,16 @@ weight
     swingLeg        100
     baseAccel       1
     contactForce    0.01
+}
+
+; State Estimation
+kalmanFilter
+{
+    footRadius                  0.02
+    imuProcessNoisePosition     0.02
+    imuProcessNoiseVelocity     0.02
+    footProcessNoisePosition    0.002
+    footSensorNoisePosition     0.005
+    footSensorNoiseVelocity     0.1
+    footHeightSensorNoise       0.01
 }

@@ -75,7 +75,19 @@ bool LeggedHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle mo
 }
 
 void LeggedHWSim::readSim(ros::Time time, ros::Duration period) {
-  gazebo_ros_control::DefaultRobotHWSim::readSim(time, period);
+  //  gazebo_ros_control::DefaultRobotHWSim::readSim(time, period); The DefaultRobotHWSim Provide a bias joint velocity
+  for (unsigned int j = 0; j < n_dof_; j++) {
+    double position = sim_joints_[j]->Position(0);
+
+    joint_velocity_[j] = (position - joint_position_[j]) / period.toSec();
+    if (joint_types_[j] == urdf::Joint::PRISMATIC) {
+      joint_position_[j] = position;
+    } else {
+      joint_position_[j] += angles::shortest_angular_distance(joint_position_[j], position);
+    }
+    joint_effort_[j] = sim_joints_[j]->GetForce((unsigned int)(0));
+  }
+
   // Imu Sensor
   for (auto& imu : imuDatas_) {
     // TODO(qiayuan) Add noise
@@ -101,7 +113,8 @@ void LeggedHWSim::readSim(ros::Time time, ros::Duration period) {
     state.second = false;
   }
   for (const auto& contact : contactManager_->GetContacts()) {
-    if (static_cast<uint32_t>(contact->time.sec) != time.sec || static_cast<uint32_t>(contact->time.nsec) != (time - period).nsec) {
+    if (static_cast<uint32_t>(contact->time.sec) != (time - period).sec ||
+        static_cast<uint32_t>(contact->time.nsec) != (time - period).nsec) {
       continue;
     }
     std::string linkName = contact->collision1->GetLink()->GetName();
