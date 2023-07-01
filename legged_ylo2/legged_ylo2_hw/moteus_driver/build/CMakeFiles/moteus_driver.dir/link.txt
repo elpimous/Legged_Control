@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmoteus_driver.a  CMakeFiles/moteus_driver.dir/src/YloTwoPcanToMoteus.cpp.o
+/usr/bin/ranlib libmoteus_driver.a

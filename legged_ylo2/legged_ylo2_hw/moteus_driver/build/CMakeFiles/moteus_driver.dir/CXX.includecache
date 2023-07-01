@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/moteus_driver/YloTwoPcanToMoteus.hpp
+iostream
+-
+ostream
+-
+iterator
+-
+ctime
+-
+vector
+-
+math.h
+-
+string.h
+-
+unistd.h
+-
+ros/ros.h
+-
+PCANBasic.h
+-
+
+/home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/src/YloTwoPcanToMoteus.cpp
+moteus_driver/YloTwoPcanToMoteus.hpp
+/home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/src/moteus_driver/YloTwoPcanToMoteus.hpp
+

@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/build",
+  "command": "/usr/bin/g++   -I/home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/include -I/home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/lib/mraa_api -I/home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/lib/mraa_api/mraa  -g   -Wall -Wextra -Wpedantic -std=gnu++17 -o CMakeFiles/moteus_driver.dir/src/YloTwoPcanToMoteus.cpp.o -c /home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/src/YloTwoPcanToMoteus.cpp",
+  "file": "/home/ylo2/Documents/travail_en_cours/legged_unitree_hw/moteus_driver/src/YloTwoPcanToMoteus.cpp"
+}
+]
