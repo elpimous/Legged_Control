@@ -78,14 +78,9 @@
                 </geometry>
             </visual>
             <collision>
-                <origin rpy="0 0 0" xyz="0 ${(0.075*mirror)} 0"/>
+                <origin rpy="0 ${pi/2.0+0.05} 0" xyz="0 ${0.074*mirror} -0.07"/>
                 <geometry>
-                    <xacro:if value="${mirror_dae == True}">
-                        <mesh filename="package://legged_ylo2_description/meshes/leg/ylo2_upper_leg_collision.dae" scale="-1 1 1"/>
-                    </xacro:if>
-                    <xacro:if value="${mirror_dae == False}">
-                        <mesh filename="package://legged_ylo2_description/meshes/leg/ylo2_upper_leg_collision.dae" scale="-1 1 1"/>
-                    </xacro:if>
+                    <box size="0.201 0.0374 0.03"/>
                 </geometry>
             </collision>
             <inertial>
@@ -122,9 +117,9 @@
                 </geometry>
             </visual>
             <collision>
-                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <origin rpy="0 ${(pi/2.0-0.1)} 0" xyz="0 0 -0.08"/>
                 <geometry>
-                    <mesh filename="package://legged_ylo2_description/meshes/leg/ylo2_lower_leg_collision.dae" scale="-1 1 1"/>
+                    <box size="0.19 0.02 0.02"/>
                 </geometry>
             </collision>
             <inertial>
@@ -154,15 +149,15 @@
 
         <link name="${prefix}_FOOT">
             <visual>
-                <origin rpy="0 0 0" xyz="0.009 ${(0.001*mirror)+0.001} 0.069"/>
+                <origin rpy="0 0 0" xyz="0.010 ${(0.001*mirror)} 0.069"/>
                 <geometry>
                     <mesh filename="package://legged_ylo2_description/meshes/leg/fl_foot.dae" scale="1.0 1.0 1.0"/>
                 </geometry>
             </visual>
             <collision>
-                <origin rpy="0 0 0" xyz="0.009 ${(0.001*mirror)+0.001} 0.069"/>
+                <origin rpy="0 0 0" xyz="0 0 0.02"/>
                 <geometry>
-                    <mesh filename="package://legged_ylo2_description/meshes/leg/fl_foot.dae" scale="1.0 1.0 1.0"/>
+                    <sphere radius="0.022"/>
                 </geometry>
             </collision>
             <inertial>

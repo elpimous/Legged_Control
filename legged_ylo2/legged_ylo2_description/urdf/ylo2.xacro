@@ -22,7 +22,7 @@
         <collision>
             <origin rpy="0 0 0" xyz="-0.02 0.003 0.024"/>
             <geometry>
-                <mesh filename="package://legged_ylo2_description/meshes/body/ylo2_body_collision.dae" scale="1 1 1"/>
+                <box size="0.26 0.18 0.14"/>
             </geometry>
         </collision>
         <inertial>
