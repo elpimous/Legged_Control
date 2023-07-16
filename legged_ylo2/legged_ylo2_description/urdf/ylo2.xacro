@@ -145,7 +145,7 @@
         <origin rpy="0 0 0" xyz="0 0 0"/>
     </joint>
 
-    <xacro:IMU connected_to="base" imu_name="unitree_imu" xyz="0. 0. 0." rpy="0. 0. 0."/>
+    <xacro:IMU connected_to="base" imu_name="ylo2_imu" xyz="0. 0. 0." rpy="0. 0. 0."/>
 
     <xacro:leg prefix="RF" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True">
         <origin rpy="0 0 0" xyz="${leg_offset_x+0.0345} ${-leg_offset_y+0.005} ${leg_offset_z}"/>

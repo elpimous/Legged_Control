@@ -25,6 +25,14 @@
 #define PCAN_DEV3	PCAN_PCIBUS3
 #define PCAN_DEV4	PCAN_PCIBUS4
 
+/* moteus controllers TX bytes adress */
+#define MSGTX_ADDR_POSITION     0x06 
+#define MSGTX_ADDR_VELOCITY     0x0A
+#define MSGTX_ADDR_FFTORQUE     0x0E
+#define MSGTX_ADDR_KP           0x12
+#define MSGTX_ADDR_KD           0x16
+#define MSGTX_ADDR_MAXTORQUE    0x1A
+
 /* moteus controllers RX bytes adress */
 #define MSGRX_ADDR_POSITION     0x02
 #define MSGRX_ADDR_VELOCITY     0x06
@@ -162,7 +170,7 @@ class YloTwoPcanToMoteus{
     float _comm_velocity      = 0;
     float _comm_kp            = 0;
     float _comm_kd            = 0;
-    float _comm_maxtorque     = 0.5; // Max possible torque is NAN value
+    float _comm_maxtorque     = 1.5; // Max possible torque is NAN value
 
 
     // for mraa library GPIO (security switch)

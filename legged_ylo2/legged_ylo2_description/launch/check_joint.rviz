@@ -175,7 +175,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        unitree_imu:
+        ylo2_imu:
           Alpha: 1
           Show Axes: false
           Show Trail: false

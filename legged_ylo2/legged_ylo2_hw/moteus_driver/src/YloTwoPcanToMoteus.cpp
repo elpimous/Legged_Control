@@ -92,12 +92,7 @@ YloTwoPcanToMoteus::YloTwoPcanToMoteus()
   moteus_tx_msg.DATA[3]  =  0x0c; // WRITE_REGISTERS - Type.F32
   moteus_tx_msg.DATA[4]  =  0x06; // 6 registers
   moteus_tx_msg.DATA[5]  =  0x20; // Starting at reg 0x020 POSITION
-  moteus_tx_msg.DATA[6]  = _comm_position;
-  moteus_tx_msg.DATA[10] = _comm_velocity;
-  moteus_tx_msg.DATA[14] = _comm_fftorque;
-  moteus_tx_msg.DATA[18] = _comm_kp;
-  moteus_tx_msg.DATA[22] = _comm_kd;
-  moteus_tx_msg.DATA[26] = _comm_maxtorque;
+  // pos, vel, fftorque, kp, kd, maxtorque (24 bytes)
   moteus_tx_msg.DATA[30] = 0x1F; // READ_REGISTERS - F32 3 registers
   moteus_tx_msg.DATA[31] = 0x01; // Starting at reg 0x001(POSITION)
   moteus_tx_msg.DATA[32] = 0x13; // READ_REGISTERS - INT8 3 registers
@@ -187,27 +182,28 @@ bool YloTwoPcanToMoteus::send_moteus_stop_order(int id, int port){
 bool YloTwoPcanToMoteus::send_moteus_TX_frame(int id, int port, float pos, float vel, float fftorque, float kp, float kd){
     _comm_position = pos;
     _comm_velocity = vel;
-    _comm_fftorque = fftorque; // in radians
+    _comm_fftorque = fftorque;
     _comm_kp       = kp;
     _comm_kd       = kd;
+
     moteus_tx_msg.ID = 0x8000 | id;
-    memcpy(&moteus_tx_msg.DATA[06], &_comm_position, sizeof(float));
-    memcpy(&moteus_tx_msg.DATA[14], &_comm_velocity, sizeof(float));
-    memcpy(&moteus_tx_msg.DATA[14], &_comm_fftorque, sizeof(float));
-    memcpy(&moteus_tx_msg.DATA[18], &_comm_kp, sizeof(float));
-    memcpy(&moteus_tx_msg.DATA[22], &_comm_kd, sizeof(float));
-    memcpy(&moteus_tx_msg.DATA[26], &_comm_maxtorque, sizeof(float));
-    //std::cout << "torque = " << _comm_fftorque << std::endl;
+
+    memcpy(&moteus_tx_msg.DATA[MSGTX_ADDR_POSITION], &_comm_position, sizeof(float));
+    memcpy(&moteus_tx_msg.DATA[MSGTX_ADDR_VELOCITY], &_comm_velocity, sizeof(float));
+    memcpy(&moteus_tx_msg.DATA[MSGTX_ADDR_FFTORQUE], &_comm_fftorque, sizeof(float));
+    memcpy(&moteus_tx_msg.DATA[MSGTX_ADDR_KP], &_comm_kp, sizeof(float));
+    memcpy(&moteus_tx_msg.DATA[MSGTX_ADDR_KD], &_comm_kd, sizeof(float));
+    memcpy(&moteus_tx_msg.DATA[MSGTX_ADDR_MAXTORQUE], &_comm_maxtorque, sizeof(float));
+
+	//std::cout << "---> Frame Moteus construite à partir des infos ci-dessus: " << std::endl;
 	//std::copy(std::begin(moteus_tx_msg.DATA), std::end(moteus_tx_msg.DATA), std::ostream_iterator<int>(std::cout, " "));
 	//std::cout << "" << std::endl;
+    // a décrypter avec : /home/ylo2/Documents/decode_Moteus_can_frame.py
 
-    do{ Status = CAN_WriteFD(port, &moteus_tx_msg); 
-        usleep(10); }
-    while(Status != PCAN_ERROR_OK); // is sent frame ok ?
-
-    if(Status == PCAN_ERROR_OK){return(true);}
-    std::cout << "error into send_moteus_TX_frame() YloTwoPcanToMoteus function : id=" << id << ". Status = " << strMsg << std::endl;
-    return(false);
+    do{ Status = CAN_WriteFD(port, &moteus_tx_msg);
+    }
+    while(Status != PCAN_ERROR_OK);
+    return(true);
 }
 
 

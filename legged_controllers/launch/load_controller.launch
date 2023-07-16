@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <launch>
-    <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]"/>
+    <arg name="robot_type" default="ylo2" doc="Robot type: [ylo2, a1, aliengo, go1, laikago]"/>
 
     <arg name="cheater" default="false"/>
 

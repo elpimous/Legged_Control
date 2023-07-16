@@ -1,5 +1,5 @@
 <launch>
-    <arg name="robot_type" default="a1" doc="Robot type: [a1, aliengo, go1, laikago]"/>
+    <arg name="robot_type" default="ylo2" doc="Robot type: [ylo2, a1, aliengo, go1, laikago]"/>
 
     <!-- Launch the imu node -->
     <node pkg="ylo2_imu" type="ylo2_imu" name="ylo2_imu">

@@ -64,18 +64,8 @@ bool Ylo2HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   setupContactSensor(robot_hw_nh);
 
   std::string robot_type;
-  robot_type = "a1";
-  /*
-  root_nh.getParam("robot_type", robot_type);
-  if (robot_type == "a1") {
-    std::cout << "robot is : " << robot_type << std::endl;
-  } else if (robot_type == "aliengo") {
-    std::cout << "robot is : " << robot_type << std::endl;
-  } else {
-    ROS_FATAL("Unknown robot type: %s", robot_type.c_str());
-    return false;
-  }
-  */
+  robot_type = "ylo2";
+
   return true;
 }
 
@@ -102,7 +92,7 @@ void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
                                   RX_volt, RX_temp, RX_fault);      // query values;
 
     jointData_[i].pos_ = static_cast<double>(sign*(RX_pos*2*M_PI)); // conversion turns -> radians
-    jointData_[i].vel_ = static_cast<double>(RX_vel*2*M_PI);
+    jointData_[i].vel_ = static_cast<double>(sign*(RX_vel*2*M_PI));
     jointData_[i].tau_ = static_cast<double>(RX_tor);               // measured in N*m
 
 
@@ -113,13 +103,17 @@ void Ylo2HW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
     usleep(150); // needed
   }
 
+  for (size_t i = 0; i < CONTACT_SENSOR_NAMES.size(); ++i) {
+    contactState_[i] = 1.0;
+  }
+
   // Set feedforward and velocity cmd to zero to avoid for safety when not controller setCommand
   std::vector<std::string> names = hybridJointInterface_.getNames();
   for (const auto& name : names) {
     HybridJointHandle handle = hybridJointInterface_.getHandle(name);
     handle.setFeedforward(0.);
     handle.setVelocityDesired(0.);
-    handle.setKd(3.);
+    handle.setKd(1.0);
   }
 }
 
@@ -137,11 +131,14 @@ void Ylo2HW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
     auto sign = command_.motor_adapters_[i].getSign(); // in case of joint reverse rotation
     
     joint_position = static_cast<float>(sign*(jointData_[i].posDes_/(2*M_PI))); // conversion radians -> turns
-    joint_velocity = static_cast<float>(jointData_[i].velDes_/(2*M_PI));
+    joint_velocity = static_cast<float>(sign*(jointData_[i].velDes_/(2*M_PI)));
     joint_fftorque = static_cast<float>(jointData_[i].ff_);
     joint_kp       = static_cast<float>(jointData_[i].kp_);
     joint_kd       = static_cast<float>(jointData_[i].kd_);
     
+    //ROS_INFO("position: %f velocity: %f fftorque: %f Kp: %f Kd: %f",
+    //        joint_position,joint_velocity,joint_fftorque,joint_kp,joint_kd);
+
     // call ylo2 moteus lib
     command_.send_moteus_TX_frame(ids, port, joint_position, joint_velocity, joint_fftorque, joint_kp, joint_kd); 
     usleep(150); // needed
@@ -189,12 +186,19 @@ bool Ylo2HW::setupJoints() {
 
 
 bool Ylo2HW::setupImu() {
-   imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("ylo2_imu", "ylo2_imu", imuData_.ori_, imuData_.oriCov_,
+  imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("ylo2_imu", "ylo2_imu", imuData_.ori_, imuData_.oriCov_,
                                                                           imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,
                                                                           imuData_.linearAccCov_));
+  imuData_.oriCov_[0] = 0.0012;
+  imuData_.oriCov_[4] = 0.0012;
+  imuData_.oriCov_[8] = 0.0012;
 
-   ROS_INFO("setupImu() OK.");
-   return true;
+  imuData_.angularVelCov_[0] = 0.0004;
+  imuData_.angularVelCov_[4] = 0.0004;
+  imuData_.angularVelCov_[8] = 0.0004;
+
+  ROS_INFO("setupImu() OK.");
+  return true;
 }
 
 
